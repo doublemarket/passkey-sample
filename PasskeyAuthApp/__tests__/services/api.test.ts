@@ -16,10 +16,6 @@ jest.mock('axios', () => {
   };
 });
 
-jest.mock('../../src/config/localConfig', () => ({
-  getMobileConfig: () => ({ apiBaseUrl: 'http://test.local' }),
-}));
-
 const axiosMock = require('axios');
 const { authApi, passkeyApi, API_BASE_URL } = require('../../src/services/api');
 
