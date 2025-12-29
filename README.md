@@ -1,31 +1,31 @@
-# Passkey Sample
+# Passkey Sample Mobile app
 
-Passkey対応のモバイルアプリ（React Native）とバックエンド（Node.js/Express）を含むサンプルです。
-環境固有の設定は `config/local.json` に集約し、公開リポジトリに含めない運用を前提にしています。
+This includes a passkey-enabled mobile app (React Native) and a backend API (Node.js/Express). You can see how Passkey works by running this on your devices.
+Environment-specific configuration lives in `config/local.json` and should not be committed to public repositories.
 
-## リポジトリ構成
+## Repository layout
 
-- `PasskeyAuthApp/` : モバイルアプリ
-- `passkey-auth-app/backend/` : バックエンドAPI
-- `config/local.json` : 環境固有設定（git管理対象外）
-- `passkey-mobile-app-specification.md` : 仕様（変更しない）
-- `docs/` : セットアップ/テスト手順
+- `PasskeyAuthApp/`: Mobile app
+- `passkey-auth-app/backend/`: Backend API
+- `config/local.json`: Environment-specific config (gitignored)
+- `passkey-mobile-app-specification.md`: Specification
+- `docs/`: Setup and test guides
 
-## クイックスタート
+## Quickstart
 
-1) ローカル設定を作成
+1) Create local config
 ```bash
 cp config/local.example.json config/local.json
 ```
 
-2) バックエンド起動
+2) Start the backend
 ```bash
 cd passkey-auth-app/backend
 npm install
 npm run dev
 ```
 
-3) モバイルアプリ起動
+3) Start the mobile app
 ```bash
 cd PasskeyAuthApp
 npm install
@@ -33,9 +33,9 @@ npm run ios    # iOS
 npm run android:local   # Android
 ```
 
-## ドキュメント
+## Documentation
 
-- モバイルアプリ: `PasskeyAuthApp/README.md`
-- バックエンド: `passkey-auth-app/README.md`
-- 仕様: `passkey-mobile-app-specification.md`
-- クイックスタート: `docs/quickstart.md`
+- Mobile app: `PasskeyAuthApp/README.md`
+- Backend: `passkey-auth-app/README.md`
+- Specification: `passkey-mobile-app-specification.md`
+- Quickstart: `docs/quickstart.md`

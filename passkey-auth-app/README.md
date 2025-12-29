@@ -1,23 +1,23 @@
 # Passkey Auth Backend
 
-Passkey検証用のバックエンドAPI（Node.js + Express）です。
-モバイルアプリと組み合わせて動作確認します。
+Backend API (Node.js + Express) for passkey verification.
+Use it together with the mobile app for end-to-end validation.
 
-## 前提条件
+## Prerequisites
 
 - Node.js 20+
 - npm
 
-## ローカル設定
+## Local configuration
 
-環境固有の値は `config/local.json` に集約します（git管理対象外）。
-初回は `config/local.example.json` をコピーして作成してください。
+Environment-specific values live in `config/local.json` (gitignored).
+Copy `config/local.example.json` to get started.
 
 ```bash
 cp ../config/local.example.json ../config/local.json
 ```
 
-主に使用される項目:
+Key fields:
 - `backend.rpId`
 - `backend.origin`
 - `backend.corsOrigins`
@@ -26,46 +26,46 @@ cp ../config/local.example.json ../config/local.json
 - `backend.androidPackageName`
 - `backend.androidSha256CertFingerprints`
 
-## セットアップ
+## Setup
 
 ```bash
 cd passkey-auth-app/backend
 npm install
 ```
 
-## 起動
+## Run
 
 ```bash
 npm run dev
 ```
 
-## テスト
+## Tests
 
 ```bash
-# リポジトリルートから実行
+# Run from the repository root
 node --test passkey-auth-app/backend/tests/models.test.js
 ```
 
-## API エンドポイント
+## API endpoints
 
-### 認証関連
-- `POST /api/auth/register` - ユーザー登録
-- `POST /api/auth/login` - パスワードログイン
-- `POST /api/auth/logout` - ログアウト
-- `GET /api/auth/session` - セッション確認
-- `GET /health` - ヘルスチェック
+### Authentication
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/login` - Password login
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/session` - Check session
+- `GET /health` - Health check
 
-### Passkey関連
+### Passkey
 - `POST /api/passkey/register/start`
 - `POST /api/passkey/register/finish`
 - `POST /api/passkey/login/start`
 - `POST /api/passkey/login/finish`
 
-## データストア
+## Data store
 
-SQLiteを使用します（`passkey-auth-app/backend/data/`）。
+SQLite is used (`passkey-auth-app/backend/data/`).
 
-## 詳細ドキュメント
+## Additional docs
 
-- クイックスタート: `docs/quickstart.md`
-- テスト手順: `docs/passkey-test-guide.md`
+- Quickstart: `docs/quickstart.md`
+- Test guide: `docs/passkey-test-guide.md`

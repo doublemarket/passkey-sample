@@ -1,7 +1,8 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
 import {Button} from '../components/Button';
 import {API_BASE_URL} from '../services/api';
+import {useTranslation} from '../localization';
 
 type CheckStatus = 'idle' | 'running' | 'ok' | 'error';
 
@@ -17,12 +18,8 @@ interface DiagnosticAdvice {
   hints: string[];
 }
 
-const initialResult: CheckResult = {
-  status: 'idle',
-  message: '未実行',
-};
-
 export const DiagnosticsScreen: React.FC = () => {
+  const {t} = useTranslation();
   const rpId = useMemo(() => {
     try {
       return new URL(API_BASE_URL).hostname;
@@ -31,21 +28,38 @@ export const DiagnosticsScreen: React.FC = () => {
     }
   }, []);
 
-  const [assetlinksResult, setAssetlinksResult] =
-    useState<CheckResult>(initialResult);
-  const [dalResult, setDalResult] = useState<CheckResult>(initialResult);
+  const createInitialResult = () => ({
+    status: 'idle' as const,
+    message: t('diagnosticsResultNotRun'),
+  });
+
+  const [assetlinksResult, setAssetlinksResult] = useState<CheckResult>(
+    createInitialResult(),
+  );
+  const [dalResult, setDalResult] = useState<CheckResult>(
+    createInitialResult(),
+  );
   const [advice, setAdvice] = useState<DiagnosticAdvice | null>(null);
+
+  useEffect(() => {
+    setAssetlinksResult(prev =>
+      prev.status === 'idle' ? createInitialResult() : prev,
+    );
+    setDalResult(prev =>
+      prev.status === 'idle' ? createInitialResult() : prev,
+    );
+  }, [t]);
 
   const runAssetlinksCheck = async () => {
     if (!rpId) {
       setAssetlinksResult({
         status: 'error',
-        message: 'RP ID が取得できません',
+        message: t('diagnosticsRpIdError'),
       });
       return;
     }
 
-    setAssetlinksResult({status: 'running', message: '取得中...'});
+    setAssetlinksResult({status: 'running', message: t('diagnosticsResultRunning')});
     try {
       const response = await fetch(
         `https://${rpId}/.well-known/assetlinks.json`,
@@ -61,7 +75,7 @@ export const DiagnosticsScreen: React.FC = () => {
     } catch (error: any) {
       setAssetlinksResult({
         status: 'error',
-        message: '取得に失敗しました',
+        message: t('diagnosticsAssetlinksFetchError'),
         details: error.message,
       });
       setAdvice(null);
@@ -72,12 +86,12 @@ export const DiagnosticsScreen: React.FC = () => {
     if (!rpId) {
       setDalResult({
         status: 'error',
-        message: 'RP ID が取得できません',
+        message: t('diagnosticsRpIdError'),
       });
       return;
     }
 
-    setDalResult({status: 'running', message: '検証中...'});
+    setDalResult({status: 'running', message: t('diagnosticsResultRunning')});
     try {
       const url =
         'https://digitalassetlinks.googleapis.com/v1/statements:list' +
@@ -95,7 +109,7 @@ export const DiagnosticsScreen: React.FC = () => {
     } catch (error: any) {
       setDalResult({
         status: 'error',
-        message: '検証に失敗しました',
+        message: t('diagnosticsDalCheckError'),
         details: error.message,
       });
       setAdvice(null);
@@ -105,52 +119,51 @@ export const DiagnosticsScreen: React.FC = () => {
   const makeAdvice = (): DiagnosticAdvice => {
     if (!rpId) {
       return {
-        title: 'RP ID を取得できません',
-        summary: 'API_BASE_URL の設定を見直してください。',
-        hints: ['API_BASE_URL が https:// で始まっているか確認してください。'],
+        title: t('diagnosticsRpIdUnavailableTitle'),
+        summary: t('diagnosticsRpIdUnavailableSummary'),
+        hints: [t('diagnosticsRpIdUnavailableHint1')],
       };
     }
 
     if (assetlinksResult.status === 'error') {
       return {
-        title: 'assetlinks.json の取得失敗',
-        summary: 'RP ID のドメインで assetlinks.json が取得できていません。',
+        title: t('diagnosticsAssetlinksFetchFailedTitle'),
+        summary: t('diagnosticsAssetlinksFetchFailedSummary'),
         hints: [
-          `https://${rpId}/.well-known/assetlinks.json が 200 で返るか確認してください。`,
-          'リダイレクトがある場合は直配信にしてください。',
-          'DNS 解決や証明書が正しいか確認してください。',
+          t('diagnosticsAssetlinksFetchFailedHint1', {rpId}),
+          t('diagnosticsAssetlinksFetchFailedHint2'),
+          t('diagnosticsAssetlinksFetchFailedHint3'),
         ],
       };
     }
 
     if (dalResult.status === 'error') {
       return {
-        title: 'Digital Asset Links の検証失敗',
-        summary: 'Google の検証 API が assetlinks.json を正しく認識できていません。',
+        title: t('diagnosticsDalFailedTitle'),
+        summary: t('diagnosticsDalFailedSummary'),
         hints: [
-          'assetlinks.json の JSON 形式が正しいか確認してください。',
-          'package_name と SHA-256 が実機インストール済み APK と一致するか確認してください。',
+          t('diagnosticsDalFailedHint1'),
+          t('diagnosticsDalFailedHint2'),
         ],
       };
     }
 
     if (assetlinksResult.status === 'ok' && dalResult.status === 'ok') {
       return {
-        title: 'サーバー側の検証はOK',
-        summary:
-          '端末側のキャッシュや Google Play Services の状態が原因の可能性が高いです。',
+        title: t('diagnosticsServerOkTitle'),
+        summary: t('diagnosticsServerOkSummary'),
         hints: [
-          'Play Services / Play Store / Chrome のデータ削除を試してください。',
-          '端末の Private DNS をオフにしてください。',
-          'アプリをアンインストールして再インストールしてください。',
+          t('diagnosticsServerOkHint1'),
+          t('diagnosticsServerOkHint2'),
+          t('diagnosticsServerOkHint3'),
         ],
       };
     }
 
     return {
-      title: '診断の実行が必要です',
-      summary: 'assetlinks と DAL の両方を実行してください。',
-      hints: ['両方のボタンを実行後に結果が表示されます。'],
+      title: t('diagnosticsNeedsRunTitle'),
+      summary: t('diagnosticsNeedsRunSummary'),
+      hints: [t('diagnosticsNeedsRunHint1')],
     };
   };
 
@@ -179,7 +192,7 @@ export const DiagnosticsScreen: React.FC = () => {
     <View style={styles.resultCard}>
       <Text style={styles.resultTitle}>{label}</Text>
       <Text style={styles.resultStatus}>
-        {result.status === 'running' ? '実行中...' : result.message}
+        {result.status === 'running' ? t('diagnosticsResultRunning') : result.message}
       </Text>
       {result.details ? (
         <Text style={styles.resultDetails}>{result.details}</Text>
@@ -189,20 +202,25 @@ export const DiagnosticsScreen: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>診断ツール</Text>
+      <Text style={styles.title}>{t('diagnosticsTitle')}</Text>
       <Text style={styles.subtitle}>
-        RP ID: {rpId || '取得できません'}
+        {t('diagnosticsSubtitle', {
+          rpId: rpId || t('diagnosticsRpIdUnavailable'),
+        })}
       </Text>
 
       <View style={styles.buttonRow}>
-        <Button title="assetlinks.json を確認" onPress={runAssetlinksCheck} />
         <Button
-          title="Digital Asset Links を確認"
+          title={t('diagnosticsAssetlinksButton')}
+          onPress={runAssetlinksCheck}
+        />
+        <Button
+          title={t('diagnosticsDalButton')}
           onPress={runDalCheck}
           variant="secondary"
         />
         <Button
-          title="自動判定"
+          title={t('diagnosticsAutoButton')}
           onPress={handleAutoDiagnose}
           variant="secondary"
         />

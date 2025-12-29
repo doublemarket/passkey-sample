@@ -3,16 +3,16 @@ import * as authController from '../controllers/authController';
 
 const router = Router();
 
-// ユーザー登録
+// Register
 router.post('/register', authController.register);
 
-// パスワードログイン
+// Password login
 router.post('/login', authController.login);
 
-// ログアウト
+// Logout
 router.post('/logout', authController.logout);
 
-// セッション確認
+// Check session
 router.get('/session', authController.getSession);
 
 export default router;

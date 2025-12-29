@@ -4,6 +4,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {AuthProvider} from './src/contexts/AuthContext';
 import {AppNavigator} from './src/navigation/AppNavigator';
+import {LanguageProvider} from './src/localization';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -12,9 +13,11 @@ function App() {
     <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaProvider>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <AuthProvider>
-          <AppNavigator />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppNavigator />
+          </AuthProvider>
+        </LanguageProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

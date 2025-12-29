@@ -1,178 +1,160 @@
-# iOS アプリ起動手順
+# iOS App Launch Guide
 
-## 現在のエラーの解決方法
+## How to resolve current errors
 
-CocoaPodsのRuby互換性エラーが発生しています。以下の手順で解決します。
+A CocoaPods Ruby compatibility error is occurring. Follow these steps to resolve it.
 
-## ステップ1: CocoaPodsを直接インストール（bundler経由ではなく）
+## Step 1: Install CocoaPods directly (not via bundler)
 
 ```bash
-# システムのCocoaPodsをインストール
+# Install system CocoaPods
 sudo gem install cocoapods
 
-# バージョン確認
+# Check version
 pod --version
 ```
 
-## ステップ2: iOS依存関係のインストール
+## Step 2: Install iOS dependencies
 
 ```bash
-cd PasskeyAuthApp/ios
+# Remove existing Pods (if any)
+rm -rf ios/Pods ios/Podfile.lock
 
-# 既存のPodsを削除（もしあれば）
-rm -rf Pods
-rm -rf Podfile.lock
-
-# 直接podコマンドでインストール（bundler経由ではなく）
+# Install directly with pod (not via bundler)
+cd ios
 pod install
-
 cd ..
 ```
 
-**エラーが出る場合**: 以下を試してください
+**If errors occur**, try the following:
 
-### 方法A: Podリポジトリを更新してから再試行
+### Option A: Update the Pod repo and retry
 
 ```bash
-cd PasskeyAuthApp/ios
 pod repo update
 pod install
-cd ..
 ```
 
-### 方法B: Ruby バージョンの問題の場合
+### Option B: Ruby version issues
 
-現在のRubyバージョンを確認:
+Check your current Ruby version:
+
 ```bash
 ruby -v
 ```
 
-rbenvを使用している場合、別のRubyバージョンを試す:
+If you use rbenv, try a different Ruby version:
+
 ```bash
-# rbenvでインストール可能なバージョンを確認
+# Check installable versions with rbenv
 rbenv install -l
 
-# 推奨: Ruby 3.1.x または 3.2.x
-rbenv install 3.1.4
-rbenv global 3.1.4
+# Recommended: Ruby 3.1.x or 3.2.x
+rbenv install 3.2.2
+rbenv global 3.2.2
 
-# CocoaPodsを再インストール
+# Reinstall CocoaPods
 gem install cocoapods
-cd PasskeyAuthApp/ios
-pod install
-cd ..
 ```
 
-### 方法C: Gemfileのactivesupportバージョンを固定
+### Option C: Pin the activesupport version in Gemfile
 
 ```bash
-cd PasskeyAuthApp/ios
-
-# Gemfileを編集（既に存在する場合）
-# または新規作成:
-cat > Gemfile << 'EOF'
+# Edit Gemfile (if it already exists)
+# Or create a new one:
+cat > Gemfile <<'GEM'
 source 'https://rubygems.org'
 
-gem 'cocoapods', '~> 1.15'
-gem 'activesupport', '~> 7.0.0'
-EOF
+gem 'activesupport', '~> 7.0.8'
+GEM
 
-# bundlerでインストール
+# Install with bundler
 bundle install
-bundle exec pod install
-
-cd ..
 ```
 
-## ステップ3: アプリの起動
+## Step 3: Launch the app
 
-### 方法1: コマンドラインから起動
+### Option 1: Launch from the command line
 
 ```bash
-# バックエンドを別ターミナルで起動
+# Start the backend in a separate terminal
 cd passkey-auth-app/backend
 npm run dev
 
-# 新しいターミナルで
+# In a new terminal
 cd PasskeyAuthApp
 npm run ios
 ```
 
-### 方法2: Xcodeから起動（推奨）
+### Option 2: Launch from Xcode (recommended)
 
 ```bash
-# Metro bundlerを起動（ターミナル1）
+# Start Metro bundler (terminal 1)
 cd PasskeyAuthApp
 npm start
 
-# 別のターミナルで Xcode を開く（ターミナル2）
+# Open Xcode in another terminal (terminal 2)
 open ios/PasskeyAuthApp.xcworkspace
 ```
 
-**重要**: `PasskeyAuthApp.xcodeproj` ではなく `PasskeyAuthApp.xcworkspace` を開いてください！
+**Important**: Open `PasskeyAuthApp.xcworkspace` (not `PasskeyAuthApp.xcodeproj`).
 
-Xcodeで:
-1. シミュレータを選択（例: iPhone 15）
-2. ▶️ ボタンをクリック
-3. アプリが起動します
+In Xcode:
+1. Select a simulator (e.g., iPhone 15)
+2. Click the ▶️ button
+3. The app launches
 
-## トラブルシューティング
+## Troubleshooting
 
-### エラー: `xcworkspace` ファイルが見つからない
+### Error: `xcworkspace` file not found
+This happens when `pod install` did not complete successfully. Re-check Step 2.
 
-pod installが成功していないため。上記のステップ2を確認してください。
-
-### エラー: Metro bundlerに接続できない
+### Error: Cannot connect to Metro bundler
 
 ```bash
-# キャッシュをクリア
-cd PasskeyAuthApp
-npm start -- --reset-cache
+# Clear cache
+npx react-native start --reset-cache
 ```
 
-### エラー: Xcodeでビルドエラー
+### Error: Xcode build error
 
 ```bash
-cd PasskeyAuthApp/ios
-# クリーンビルド
-xcodebuild clean -workspace PasskeyAuthApp.xcworkspace -scheme PasskeyAuthApp
-
-# Xcodeで Product > Clean Build Folder を実行
+# Clean build
+cd ios
+xcodebuild clean
 ```
 
-## 簡易版: bundlerを使わずに直接pod installする方法
+Then in Xcode: Product > Clean Build Folder
 
-これが最も簡単な方法です:
+## Simplified path: run pod install without bundler
+This is the easiest approach:
 
 ```bash
-# 1. システムのCocoaPodsをインストール
+# 1. Install system CocoaPods
 sudo gem install cocoapods
 
-# 2. Podsをインストール
-cd PasskeyAuthApp/ios
+# 2. Install Pods
+cd ios
 pod install
 cd ..
 
-# 3. Xcodeで開く
+# 3. Open in Xcode
 open ios/PasskeyAuthApp.xcworkspace
 
-# 4. 別ターミナルでMetro bundlerを起動
-cd PasskeyAuthApp
+# 4. Start Metro bundler in a separate terminal
 npm start
 
-# 5. XcodeでShift+Cmd+Rでビルド&実行
+# 5. Build & run (Shift+Cmd+R)
 ```
 
-## 最終手段: Expo Goを使う（ネイティブモジュールなしの場合）
+## Last resort: Use Expo Go (if no native modules)
+If you cannot build at all, you can preview with Expo Go, but this project uses React Native CLI.
+Migration to Expo is not recommended.
 
-もしどうしてもビルドできない場合は、Expo Goアプリでプレビューすることも可能ですが、
-このプロジェクトはReact Native CLIで作成されているため、Expoへの移行は推奨しません。
+## Confirm success
+If startup succeeds:
+1. The iOS simulator launches
+2. The app's welcome screen appears
+3. **Log In** and **Register** buttons are visible
 
-## 成功の確認
-
-起動が成功すると:
-1. iOSシミュレータが起動
-2. アプリのウェルカム画面が表示される
-3. 「ログイン」「新規登録」ボタンが表示される
-
-この状態になれば成功です！
+If you see this, the setup is complete.

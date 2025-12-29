@@ -1,204 +1,179 @@
-# クイックスタートガイド
+# Quickstart Guide
 
-## Phase 1完了: パスワード認証機能
+## Phase 1 Complete: Password Authentication
+React Native mobile app and backend API implementation are complete.
 
-React NativeモバイルアプリケーションとバックエンドAPIの実装が完了しました。
+## Confirm prerequisites
+To run the mobile app, you need one of the following development environments:
 
-## 前提条件の確認
+### Option 1: Android development environment (recommended)
+- **Android Studio**: [Download](https://developer.android.com/studio)
+- Installing Android Studio enables the `adb` command
+- Create an emulator in AVD Manager
 
-モバイルアプリを実行するには、以下のいずれかの開発環境が必要です:
+### Option 2: iOS development environment (macOS only, more complex)
+- **Xcode**: Install from the App Store
+- Proper Ruby version management is required
 
-### オプション1: Android開発環境（推奨）
-- **Android Studio**: [ダウンロード](https://developer.android.com/studio)
-- Android Studioをインストールすると`adb`コマンドが使用可能になります
-- AVD Manager でエミュレータを作成してください
+### Option 3: Test on a physical device
+If you have an iPhone or Android device:
+1. Open `config/local.json`
+2. Update `mobile.apiBaseUrl` to your computer's local IP address:
 
-### オプション2: iOS開発環境（macOSのみ、複雑）
-- **Xcode**: App Storeからインストール
-- **CocoaPods**: `sudo gem install cocoapods`
-- 適切なRubyバージョン管理が必要
+```json
+"mobile": {
+  "apiBaseUrl": "http://192.168.1.100:3000"
+}
+```
 
-### オプション3: 実機でテスト
-実機（iPhoneまたはAndroid）がある場合:
-1. `config/local.json`を開く
-2. `mobile.apiBaseUrl`をコンピューターのローカルIPアドレスに変更:
-   ```json
-   {
-     "mobile": {
-       "apiBaseUrl": "http://192.168.1.XXX:3000"
-     }
-   }
-   ```
-3. 実機をUSB接続して`npm run ios`または`npm run android:local`
+3. Connect your device via USB and run `npm run ios` or `npm run android:local`
 
----
+## Startup steps
 
-## 起動手順
-
-### 1. バックエンドサーバーの起動
+### 1. Start the backend server
 
 ```bash
-# ターミナル1
+# Terminal 1
 cd passkey-auth-app/backend
+npm install
 npm run dev
 ```
 
-バックエンドが `http://localhost:3000` で起動します。
+The backend runs at `http://localhost:3000`.
 
-### 2. モバイルアプリの起動
+### 2. Start the mobile app
 
-⚠️ **推奨: Androidエミュレータを使用してください**
+⚠️ **Recommendation: Use the Android emulator**
 
-iOS開発にはCocoaPods、Xcode、適切なRubyバージョンなど複雑な環境設定が必要です。
-まずはAndroidエミュレータで動作確認することを強くお勧めします。
+iOS development requires CocoaPods, Xcode, and specific Ruby versions, which can be more complex.
+We recommend validating on the Android emulator first.
 
-#### ✅ Android エミュレータの場合（推奨）
+#### ✅ Android emulator (recommended)
 
 ```bash
-# ターミナル2
+# Terminal 2
 cd PasskeyAuthApp
+npm install
 
-# ポートフォワーディング（必須）
+# Port forwarding (required)
 adb reverse tcp:3000 tcp:3000
 
-# アプリの起動
+# Start the app
 npm run android:local
 ```
 
-**前提条件**: Android Studioがインストールされ、エミュレータが作成されていること
+**Prerequisite**: Android Studio is installed and an emulator is created.
 
----
-
-#### iOS シミュレータの場合（上級者向け）
+#### iOS simulator (advanced)
 
 ```bash
-# ターミナル2
+# Terminal 2
 cd PasskeyAuthApp
+npm install
 
-# iOS Podsのインストール（初回のみ）
-# CocoaPodsがインストールされていない場合:
-sudo gem install cocoapods
-
-# Podsのインストール
+# Install iOS Pods (first time only)
 cd ios
+# If CocoaPods is not installed:
+# sudo gem install cocoapods
 pod install
 cd ..
 
-# アプリの起動
+# Start the app
 npm run ios
 ```
 
-**注意**: CocoaPodsのインストールに問題がある場合、以下の方法でアプリを起動できます:
+**Note**: If you have issues installing CocoaPods, use one of the following:
 
-**方法1: Xcodeから直接起動**
+**Option 1: Launch from Xcode**
+
 ```bash
-cd PasskeyAuthApp
-# Metro bundlerを起動
+# Start Metro bundler
 npm start
-# 別のターミナルでXcodeを開く
+
+# Open Xcode in another terminal
 open ios/PasskeyAuthApp.xcworkspace
-# Xcodeで ▶️ ボタンをクリックして起動
+
+# Click ▶️ to run
 ```
 
-**方法2: Androidで試す（推奨）**
-上記のiOSセットアップでエラーが発生する場合は、Androidエミュレータを使用してください。
+**Option 2: Try Android instead (recommended)**
+If the iOS setup fails, use the Android emulator.
 
-## テストフロー
+## Test flow
 
-### 1. 新規ユーザー登録
+### 1. Register a new user
+1. Tap **Register** on the welcome screen
+2. Enter the following:
+   - Username: `testuser`
+   - Password: `password123`
+   - Confirm Password: `password123`
+3. Tap **Register**
+4. A completion dialog appears and you are redirected to the login screen
 
-1. アプリが起動したら「新規登録」をタップ
-2. 以下を入力:
-   - ユーザー名: `testuser`
-   - パスワード: `password123`
-   - パスワード（確認）: `password123`
-3. 「登録」ボタンをタップ
-4. 登録完了ダイアログが表示され、ログイン画面に遷移
+### 2. Log in
+1. Enter the following on the login screen:
+   - Username: `testuser`
+   - Password: `password123`
+2. Tap **Log In**
+3. The home screen shows:
+   - Authentication method: Password
+   - Username: testuser
+   - Authentication time
+   - User ID
 
-### 2. ログイン
+### 3. Log out
+1. Tap **Log Out** on the home screen
+2. Confirm **Log Out**
+3. Return to the welcome screen
 
-1. ログイン画面で以下を入力:
-   - ユーザー名: `testuser`
-   - パスワード: `password123`
-2. 「ログイン」ボタンをタップ
-3. ホーム画面に遷移し、以下が表示されます:
-   - 認証方法: パスワード認証
-   - ユーザー名: testuser
-   - 認証日時
-   - ユーザーID
+## Troubleshooting
 
-### 3. ログアウト
+### iOS Pods installation error
 
-1. ホーム画面で「ログアウト」ボタンをタップ
-2. 確認ダイアログで「ログアウト」を選択
-3. ウェルカム画面に戻る
-
-## トラブルシューティング
-
-### iOS Pods インストールエラー
-
+### Android cannot connect to the backend
 ```bash
-cd PasskeyAuthApp/ios
-pod repo update
-pod install --repo-update
-cd ..
-```
-
-### Androidでバックエンドに接続できない
-
-```bash
-# ポートフォワーディングを確認
+# Confirm port forwarding
 adb reverse tcp:3000 tcp:3000
 ```
 
-### Metro bundlerエラー
+### Metro bundler error
 
-```bash
-cd PasskeyAuthApp
-npm start -- --reset-cache
-```
+## Implemented features
 
-## 実装済み機能
+✅ Welcome screen
+✅ Registration screen (with validation)
+✅ Login screen
+✅ Home screen (post-authentication)
+✅ Session management
+✅ Error handling
+✅ Loading indicator
 
-✅ ウェルカム画面
-✅ 新規登録画面（バリデーション付き）
-✅ ログイン画面
-✅ ホーム画面（認証後）
-✅ セッション管理
-✅ エラーハンドリング
-✅ ローディングインジケーター
+## Planned in Phase 2
 
-## Phase 2で実装予定
+⏳ Passkey registration
+⏳ Passkey login
+⏳ Biometric authentication
+⏳ Passkey management screen
 
-⏳ Passkey登録機能
-⏳ Passkeyログイン機能
-⏳ 生体認証統合
-⏳ Passkey管理画面
-
-## ファイル構成
+## File structure
 
 ```
 passkey-sample/
-├── passkey-auth-app/          # バックエンド
+├── passkey-auth-app/          # Backend
 │   └── backend/
-│       ├── src/
-│       ├── data/              # SQLiteデータベース
-│       └── package.json
-└── PasskeyAuthApp/            # モバイルアプリ
-    ├── src/
-    │   ├── components/        # UIコンポーネント
-    │   ├── contexts/          # 状態管理
-    │   ├── navigation/        # ナビゲーション
-    │   ├── screens/           # 画面
-    │   ├── services/          # APIクライアント
-    │   └── types/             # 型定義
-    ├── android/
-    ├── ios/
-    └── App.tsx
+│       ├── data/              # SQLite database
+│       └── src/
+└── PasskeyAuthApp/            # Mobile app
+    ├── components/            # UI components
+    ├── contexts/              # State management
+    ├── navigation/            # Navigation
+    ├── screens/               # Screens
+    ├── services/              # API client
+    └── types/                 # Type definitions
 ```
 
-## 詳細ドキュメント
+## Additional docs
 
-- モバイルアプリ: `PasskeyAuthApp/README.md`
-- バックエンド: `passkey-auth-app/README.md`
-- 仕様書: `passkey-mobile-app-specification.md`
+- Mobile app: `PasskeyAuthApp/README.md`
+- Backend: `passkey-auth-app/README.md`
+- Specification: `passkey-mobile-app-specification.md`

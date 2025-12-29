@@ -20,7 +20,7 @@ export interface CreatePasskeyData {
 }
 
 /**
- * 新規Passkeyを作成
+ * Create a new passkey.
  */
 export function createPasskey(data: CreatePasskeyData): Passkey {
   const id = uuidv4();
@@ -37,7 +37,7 @@ export function createPasskey(data: CreatePasskeyData): Passkey {
 }
 
 /**
- * IDでPasskeyを取得
+ * Fetch a passkey by ID.
  */
 export function getPasskeyById(id: string): Passkey | undefined {
   const stmt = db.prepare(`
@@ -48,7 +48,7 @@ export function getPasskeyById(id: string): Passkey | undefined {
 }
 
 /**
- * Credential IDでPasskeyを取得
+ * Fetch a passkey by credential ID.
  */
 export function getPasskeyByCredentialId(credentialId: string): Passkey | undefined {
   const stmt = db.prepare(`
@@ -59,7 +59,7 @@ export function getPasskeyByCredentialId(credentialId: string): Passkey | undefi
 }
 
 /**
- * ユーザーIDでPasskeyを取得（複数）
+ * Fetch passkeys by user ID.
  */
 export function getPasskeysByUserId(userId: string): Passkey[] {
   const stmt = db.prepare(`
@@ -70,7 +70,7 @@ export function getPasskeysByUserId(userId: string): Passkey[] {
 }
 
 /**
- * Passkeyのカウンターを更新
+ * Update the passkey counter.
  */
 export function updatePasskeyCounter(credentialId: string, counter: number): void {
   const stmt = db.prepare(`
@@ -81,7 +81,7 @@ export function updatePasskeyCounter(credentialId: string, counter: number): voi
 }
 
 /**
- * ユーザーがPasskeyを持っているか確認
+ * Check whether a user has a passkey.
  */
 export function hasPasskey(userId: string): boolean {
   const stmt = db.prepare(`

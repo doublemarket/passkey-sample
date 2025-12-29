@@ -18,7 +18,7 @@ export interface CreateChallengeData {
 }
 
 /**
- * 新規Challengeを作成
+ * Create a new challenge.
  */
 export function createChallenge(data: CreateChallengeData): Challenge {
   const id = uuidv4();
@@ -35,7 +35,7 @@ export function createChallenge(data: CreateChallengeData): Challenge {
 }
 
 /**
- * IDでChallengeを取得
+ * Fetch a challenge by ID.
  */
 export function getChallengeById(id: string): Challenge | undefined {
   const stmt = db.prepare(`
@@ -46,7 +46,7 @@ export function getChallengeById(id: string): Challenge | undefined {
 }
 
 /**
- * Challengeの値で取得（有効期限内のもの）
+ * Fetch a valid challenge by value.
  */
 export function getValidChallenge(
   challenge: string, 
@@ -65,7 +65,7 @@ export function getValidChallenge(
 }
 
 /**
- * ユーザーIDとタイプで最新のChallengeを取得
+ * Fetch the latest challenge by user and type.
  */
 export function getChallengeByUserAndType(
   userId: string,
@@ -84,7 +84,7 @@ export function getChallengeByUserAndType(
 }
 
 /**
- * Challengeを削除
+ * Delete a challenge by ID.
  */
 export function deleteChallenge(id: string): void {
   const stmt = db.prepare(`
@@ -95,7 +95,7 @@ export function deleteChallenge(id: string): void {
 }
 
 /**
- * Challengeを値で削除
+ * Delete a challenge by value.
  */
 export function deleteChallengeByValue(challenge: string): void {
   const stmt = db.prepare(`
@@ -106,7 +106,7 @@ export function deleteChallengeByValue(challenge: string): void {
 }
 
 /**
- * ユーザーの古いChallengeを削除
+ * Delete a user's old challenges.
  */
 export function cleanupUserChallenges(userId: string, type: 'registration' | 'authentication'): void {
   const stmt = db.prepare(`

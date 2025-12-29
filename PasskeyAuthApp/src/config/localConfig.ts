@@ -28,7 +28,7 @@ type LocalConfig = {
   backend?: BackendConfig;
 };
 
-// local.jsonは.gitignore対象で、環境固有の設定をまとめて管理する。
+// local.json is gitignored and stores environment-specific settings.
 const localConfig = require('config/local.json') as LocalConfig;
 
 export const getMobileConfig = () => ({

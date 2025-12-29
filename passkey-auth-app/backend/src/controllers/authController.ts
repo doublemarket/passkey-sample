@@ -2,18 +2,18 @@ import { Request, Response } from 'express';
 import * as UserModel from '../models/User';
 
 /**
- * ユーザー登録
+ * Register a user.
  * POST /api/auth/register
  */
 export async function register(req: Request, res: Response): Promise<void> {
   try {
     const { username, password } = req.body;
 
-    // バリデーション
+    // Validation
     if (!username || !password) {
       res.status(400).json({ 
         success: false,
-        message: 'ユーザー名とパスワードは必須です' 
+        message: 'Username and password are required.' 
       });
       return;
     }
@@ -21,7 +21,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     if (username.length < 3) {
       res.status(400).json({ 
         success: false,
-        message: 'ユーザー名は3文字以上である必要があります' 
+        message: 'Username must be at least 3 characters long.' 
       });
       return;
     }
@@ -29,30 +29,30 @@ export async function register(req: Request, res: Response): Promise<void> {
     if (password.length < 6) {
       res.status(400).json({ 
         success: false,
-        message: 'パスワードは6文字以上である必要があります' 
+        message: 'Password must be at least 6 characters long.' 
       });
       return;
     }
 
-    // 重複チェック
+    // Duplicate check
     if (UserModel.isUsernameExists(username)) {
       res.status(409).json({ 
         success: false,
-        message: 'このユーザー名は既に使用されています' 
+        message: 'That username is already taken.' 
       });
       return;
     }
 
-    // ユーザー作成
+    // Create user
     const user = UserModel.createUser({ username, password });
 
-    // セッションに保存
+    // Store in session
     req.session.userId = user.id;
     req.session.username = user.username;
 
     res.status(201).json({
       success: true,
-      message: 'ユーザー登録が完了しました',
+      message: 'Registration completed.',
       user: {
         id: user.id,
         username: user.username,
@@ -62,55 +62,55 @@ export async function register(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ 
-      error: 'サーバーエラーが発生しました' 
+      error: 'A server error occurred.' 
     });
   }
 }
 
 /**
- * パスワードログイン
+ * Password login.
  * POST /api/auth/login
  */
 export async function login(req: Request, res: Response): Promise<void> {
   try {
     const { username, password } = req.body;
 
-    // バリデーション
+    // Validation
     if (!username || !password) {
       res.status(400).json({ 
         success: false,
-        message: 'ユーザー名とパスワードは必須です' 
+        message: 'Username and password are required.' 
       });
       return;
     }
 
-    // ユーザー取得
+    // Fetch user
     const user = UserModel.getUserByUsername(username);
     if (!user) {
       res.status(401).json({ 
         success: false,
-        message: 'ユーザー名またはパスワードが正しくありません' 
+        message: 'Incorrect username or password.' 
       });
       return;
     }
 
-    // パスワード検証
+    // Verify password
     if (!UserModel.verifyPassword(user, password)) {
       res.status(401).json({ 
         success: false,
-        message: 'ユーザー名またはパスワードが正しくありません' 
+        message: 'Incorrect username or password.' 
       });
       return;
     }
 
-    // セッションに保存
+    // Store in session
     req.session.userId = user.id;
     req.session.username = user.username;
     req.session.authMethod = 'password';
 
     res.json({
       success: true,
-      message: 'ログインに成功しました',
+      message: 'Login succeeded.',
       user: {
         id: user.id,
         username: user.username
@@ -120,13 +120,13 @@ export async function login(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ 
-      error: 'サーバーエラーが発生しました' 
+      error: 'A server error occurred.' 
     });
   }
 }
 
 /**
- * ログアウト
+ * Logout.
  * POST /api/auth/logout
  */
 export async function logout(req: Request, res: Response): Promise<void> {
@@ -135,24 +135,24 @@ export async function logout(req: Request, res: Response): Promise<void> {
       if (err) {
         console.error('Logout error:', err);
         res.status(500).json({ 
-          error: 'ログアウトに失敗しました' 
+          error: 'Failed to log out.' 
         });
         return;
       }
       res.json({ 
-        message: 'ログアウトしました' 
+        message: 'Logged out.' 
       });
     });
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ 
-      error: 'サーバーエラーが発生しました' 
+      error: 'A server error occurred.' 
     });
   }
 }
 
 /**
- * セッション確認
+ * Check session.
  * GET /api/auth/session
  */
 export async function getSession(req: Request, res: Response): Promise<void> {
@@ -183,7 +183,7 @@ export async function getSession(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error('Session check error:', error);
     res.status(500).json({ 
-      error: 'サーバーエラーが発生しました' 
+      error: 'A server error occurred.' 
     });
   }
 }

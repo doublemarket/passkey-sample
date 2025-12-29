@@ -15,6 +15,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/types';
 import {isPasskeySupported} from '../services/passkeyService';
+import {useTranslation} from '../localization';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -27,6 +28,7 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const {login, loginWithPasskey} = useAuth();
+  const {t} = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,12 +39,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     const newErrors = {username: '', password: ''};
 
     if (!username.trim()) {
-      newErrors.username = 'ユーザー名を入力してください';
+      newErrors.username = t('loginValidationUsernameRequired');
       valid = false;
     }
 
     if (!password) {
-      newErrors.password = 'パスワードを入力してください';
+      newErrors.password = t('loginValidationPasswordRequired');
       valid = false;
     }
 
@@ -60,22 +62,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       const result = await login({username, password});
       if (result.success) {
       } else {
-        Alert.alert('ログイン失敗', result.message);
+        Alert.alert(t('loginFailedTitle'), result.message);
       }
     } catch (error: any) {
-      Alert.alert('エラー', error.message || 'ログインに失敗しました');
+      Alert.alert(t('commonError'), error.message || t('errorsLoginFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   const handlePasskeyLogin = async () => {
-    // Passkeyサポート確認
+    // Confirm passkey support.
     if (!isPasskeySupported()) {
       Alert.alert(
-        'Passkey未対応',
-        'このデバイスではPasskeyがサポートされていません',
-        [{text: 'OK'}]
+        t('passkeyNotSupportedTitle'),
+        t('passkeyNotSupportedMessage'),
+        [{text: t('commonOk')}],
       );
       return;
     }
@@ -85,14 +87,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       const result = await loginWithPasskey();
       if (result.success && result.user) {
         Alert.alert(
-          'ログイン成功',
-          `${result.user.username}さん、Passkeyでログインしました`
+          t('loginSuccessTitle'),
+          t('loginPasskeySuccessMessage', {username: result.user.username}),
         );
       } else {
-        Alert.alert('Passkeyログイン失敗', result.message);
+        Alert.alert(t('passkeyLoginFailedTitle'), result.message);
       }
     } catch (error: any) {
-      Alert.alert('Passkeyログイン失敗', error.message);
+      Alert.alert(t('passkeyLoginFailedTitle'), error.message);
     } finally {
       setLoading(false);
     }
@@ -107,31 +109,31 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>ログイン</Text>
-          <Text style={styles.subtitle}>アカウント情報を入力してください</Text>
+          <Text style={styles.title}>{t('loginTitle')}</Text>
+          <Text style={styles.subtitle}>{t('loginSubtitle')}</Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            label="ユーザー名"
+            label={t('loginUsernameLabel')}
             value={username}
             onChangeText={setUsername}
-            placeholder="ユーザー名を入力"
+            placeholder={t('loginUsernamePlaceholder')}
             autoCapitalize="none"
             error={errors.username}
           />
 
           <Input
-            label="パスワード"
+            label={t('loginPasswordLabel')}
             value={password}
             onChangeText={setPassword}
-            placeholder="パスワードを入力"
+            placeholder={t('loginPasswordPlaceholder')}
             secureTextEntry
             error={errors.password}
           />
 
           <Button
-            title="ログイン"
+            title={t('loginButton')}
             onPress={handleLogin}
             loading={loading}
             style={styles.button}
@@ -139,12 +141,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>または</Text>
+            <Text style={styles.dividerText}>{t('loginDivider')}</Text>
             <View style={styles.dividerLine} />
           </View>
 
           <Button
-            title="Passkeyでログイン"
+            title={t('loginWithPasskey')}
             onPress={handlePasskeyLogin}
             variant="secondary"
             style={styles.button}
@@ -155,7 +157,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
             onPress={() => navigation.navigate('Register')}
             style={styles.linkContainer}>
             <Text style={styles.linkText}>
-              アカウントをお持ちでない方は新規登録
+              {t('loginNoAccount')}
             </Text>
           </TouchableOpacity>
         </View>

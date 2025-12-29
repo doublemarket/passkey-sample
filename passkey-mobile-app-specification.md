@@ -1,121 +1,125 @@
-# Passkeyログイン検証用モバイルアプリケーション仕様書
+# Mobile Application Specification for Passkey Login Verification
 
-## 1. プロジェクト概要
+## 1. Project Overview
 
-### 1.1 目的
-WebAuthn/FIDO2準拠のPasskey機能の挙動を検証するための最小限のモバイルアプリケーション
+### 1.1 Purpose
+A minimal mobile application to verify the behavior of WebAuthn/FIDO2-compliant passkeys.
 
-### 1.2 対象プラットフォーム
-- iOS (iOS 16.0以降を推奨)
-- Android (Android 9.0 / API Level 28以降を推奨)
+### 1.2 Target platforms
+- iOS (recommended: iOS 16.0+)
+- Android (recommended: Android 9.0 / API Level 28+)
 
-### 1.3 技術スタック
+### 1.3 Technology stack
 
-#### フロントエンド
-- **フレームワーク**: React Native (クロスプラットフォーム開発)
-- **言語**: TypeScript
-- **状態管理**: React Hooks (useState, useEffect)
-- **ナビゲーション**: React Navigation
+#### Frontend
+- **Framework**: React Native (cross-platform)
+- **Language**: TypeScript
+- **State management**: React Hooks (useState, useEffect)
+- **Navigation**: React Navigation
 
-#### バックエンド
-- **フレームワーク**: Node.js + Express
-- **言語**: TypeScript
-- **認証ライブラリ**: @simplewebauthn/server (WebAuthn実装)
-- **データベース**: SQLite (ローカル開発用、シンプルな実装)
-- **セッション管理**: express-session
+#### Backend
+- **Framework**: Node.js + Express
+- **Language**: TypeScript
+- **Authentication library**: @simplewebauthn/server (WebAuthn implementation)
+- **Database**: SQLite (local development, simple implementation)
+- **Session management**: express-session
 
-#### Passkey関連ライブラリ
-- **iOS/Android**: @simplewebauthn/browser (React Native用ラッパー)
-- **代替案**: react-native-passkey (ネイティブモジュール)
+#### Passkey-related libraries
+- **iOS/Android**: @simplewebauthn/browser (React Native wrapper)
+- **Alternative**: react-native-passkey (native module)
 
-**注**: Passkeyの実装にはバックエンドが必須です。WebAuthn/FIDO2プロトコルでは、チャレンジの生成・検証、公開鍵の保存、認証情報の管理などサーバーサイド処理が不可欠です。
-
----
-
-## 2. 機能要件
-
-### 2.1 画面構成
-
-#### 2.1.1 ウェルカム画面
-- **目的**: アプリ起動時の初期画面
-- **要素**:
-  - アプリタイトル
-  - 「ログイン」ボタン
-  - 「新規登録」ボタン
-
-#### 2.1.2 新規登録画面
-- **目的**: 新規ユーザーの登録
-- **要素**:
-  - ユーザー名入力フィールド
-  - パスワード入力フィールド
-  - 「登録」ボタン
-  - 「Passkeyを登録」チェックボックス (オプション)
-  - 「ログイン画面へ戻る」リンク
-
-#### 2.1.3 ログイン画面
-- **目的**: 既存ユーザーの認証
-- **要素**:
-  - ユーザー名入力フィールド
-  - パスワード入力フィールド
-  - 「ログイン」ボタン
-  - 「Passkeyでログイン」ボタン
-  - 「新規登録へ」リンク
-
-#### 2.1.4 Passkey管理画面
-- **目的**: Passkeyの追加登録
-- **要素**:
-  - 現在のユーザー名表示
-  - 「Passkeyを追加登録」ボタン
-  - 「ログアウト」ボタン
-
-#### 2.1.5 ログイン成功画面
-- **目的**: 認証成功の確認
-- **要素**:
-  - 「ログイン成功」メッセージ
-  - 認証方法の表示 (「パスワード認証」or「Passkey認証」)
-  - ユーザー名の表示
-  - 認証日時の表示
-  - 「Passkey管理」ボタン (Passkeyが未登録の場合のみ表示)
-  - 「ログアウト」ボタン
+**Note**: A backend is required for passkey implementation. The WebAuthn/FIDO2 protocol requires server-side handling such as challenge generation/verification, public key storage, and credential management.
 
 ---
 
-## 3. 詳細機能仕様
+## 2. Functional requirements
 
-### 3.1 ユーザー登録機能
+English and Japanese are supported in the app.
 
-#### 3.1.1 パスワード登録フロー
+### 2.1 Screen structure
+
+#### 2.1.1 Welcome screen
+- **Purpose**: Initial screen on app launch
+- **Elements**:
+  - App title
+  - Language selector
+    - Users can choose English or Japanese as a display language. The default selection is based on the device language configuration.
+  - **Log In** button
+  - **Register** button
+
+#### 2.1.2 Registration screen
+- **Purpose**: Register a new user
+- **Elements**:
+  - Username input field
+  - Password input field
+  - **Register** button
+  - **Register a passkey** checkbox (optional)
+  - **Back to login** link
+
+#### 2.1.3 Login screen
+- **Purpose**: Authenticate an existing user
+- **Elements**:
+  - Username input field
+  - Password input field
+  - **Log In** button
+  - **Log In with Passkey** button
+  - **Go to Register** link
+
+#### 2.1.4 Passkey management screen
+- **Purpose**: Add a passkey
+- **Elements**:
+  - Current username display
+  - **Register Passkey** button
+  - **Log Out** button
+
+#### 2.1.5 Login success screen
+- **Purpose**: Confirm successful authentication
+- **Elements**:
+  - **Login Successful** message
+  - Authentication method display (**Password** or **Passkey**)
+  - Username display
+  - Authentication timestamp display
+  - **Passkey Management** button (only if no passkey is registered)
+  - **Log Out** button
+
+---
+
+## 3. Detailed functional specification
+
+### 3.1 User registration
+
+#### 3.1.1 Password registration flow
 ```
-1. ユーザーが新規登録画面でユーザー名とパスワードを入力
-2. 「登録」ボタンをタップ
-3. バックエンドに登録リクエスト送信
+1. User enters username and password on the registration screen
+2. Tap the Register button
+3. Send registration request to the backend
    POST /api/auth/register
    Body: { username: string, password: string }
-4. バックエンドで以下を処理:
-   - ユーザー名の重複チェック
-   - パスワードのハッシュ化 (bcrypt使用)
-   - データベースへ保存
-5. 成功時: ログイン画面へ遷移してトースト表示「登録完了」
-6. 失敗時: エラーメッセージ表示
+4. Backend processes:
+   - Check for duplicate username
+   - Hash password (bcrypt)
+   - Save to database
+5. On success: navigate to login screen and show a toast "Registration complete"
+6. On failure: show an error message
 ```
 
-#### 3.1.2 Passkey同時登録フロー
+#### 3.1.2 Registration with passkey flow
 ```
-1. ユーザーが「Passkeyを登録」チェックボックスをONにして登録
-2. パスワード登録完了後、自動的にPasskey登録フローへ
-3. Passkey登録処理 (3.2参照)
-4. 成功時: ログイン成功画面へ遷移
+1. User turns ON the "Register a passkey" checkbox
+2. After password registration completes, proceed to the passkey registration flow
+3. Passkey registration (see 3.2)
+4. On success: navigate to login success screen
 ```
 
-### 3.2 Passkey登録機能
+### 3.2 Passkey registration
 
-#### 3.2.1 登録フロー
+#### 3.2.1 Registration flow
 ```
-1. ユーザーが「Passkeyを追加登録」ボタンをタップ
-2. バックエンドに登録開始リクエスト
+1. User taps the "Register Passkey" button
+2. Send registration start request to the backend
    POST /api/passkey/register/start
    Body: { username: string }
-3. バックエンドがWebAuthn登録チャレンジを生成して返却
+3. Backend generates a WebAuthn registration challenge and returns it
    Response: {
      challenge: string (Base64),
      rp: { id: string, name: string },
@@ -124,106 +128,106 @@ WebAuthn/FIDO2準拠のPasskey機能の挙動を検証するための最小限�
      timeout: number,
      attestation: "none"
    }
-4. フロントエンドでプラットフォーム認証器を呼び出し
+4. Frontend invokes the platform authenticator
    - iOS: Face ID / Touch ID
    - Android: Biometric API
-5. ユーザーが生体認証を実行
-6. 認証器から公開鍵認証情報を取得
-7. バックエンドに登録完了リクエスト
+5. User completes biometric authentication
+6. Authenticator returns the public key credential
+7. Send registration finish request to the backend
    POST /api/passkey/register/finish
    Body: { username: string, credential: PublicKeyCredential }
-8. バックエンドで検証・保存:
-   - チャレンジの検証
-   - 公開鍵の保存
-   - credentialIdの保存
-9. 成功時: 「Passkey登録完了」メッセージ表示
-10. 失敗時: エラーメッセージ表示
+8. Backend verifies and stores:
+   - Challenge verification
+   - Public key storage
+   - Credential ID storage
+9. On success: show a "Passkey registration complete" message
+10. On failure: show an error message
 ```
 
-### 3.3 ログイン機能
+### 3.3 Login
 
-#### 3.3.1 パスワードログインフロー
+#### 3.3.1 Password login flow
 ```
-1. ユーザーがログイン画面でユーザー名とパスワードを入力
-2. 「ログイン」ボタンをタップ
-3. バックエンドに認証リクエスト
+1. User enters username and password on the login screen
+2. Tap the Log In button
+3. Send authentication request to the backend
    POST /api/auth/login
    Body: { username: string, password: string }
-4. バックエンドで検証:
-   - ユーザー存在確認
-   - パスワードハッシュ照合
-5. 成功時:
-   - セッショントークン発行
-   - ログイン成功画面へ遷移
-   - 認証方法: 「パスワード認証」表示
-6. 失敗時: エラーメッセージ表示
+4. Backend verifies:
+   - User exists
+   - Password hash matches
+5. On success:
+   - Issue session token
+   - Navigate to login success screen
+   - Show authentication method: "Password"
+6. On failure: show an error message
 ```
 
-#### 3.3.2 Passkeyログインフロー
+#### 3.3.2 Passkey login flow
 ```
-1. ユーザーが「Passkeyでログイン」ボタンをタップ
-2. バックエンドに認証開始リクエスト
+1. User taps the "Log In with Passkey" button
+2. Send authentication start request to the backend
    POST /api/passkey/login/start
-   Body: {} (ユーザー名不要: usernameless認証)
-3. バックエンドがWebAuthn認証チャレンジを生成
+   Body: {} (usernameless authentication)
+3. Backend generates a WebAuthn authentication challenge
    Response: {
      challenge: string (Base64),
      rpId: string,
-     allowCredentials: [], // 空配列でusernameless
+     allowCredentials: [], // empty for usernameless
      timeout: number,
      userVerification: "required"
    }
-4. フロントエンドでプラットフォーム認証器を呼び出し
-5. ユーザーが生体認証を実行
-6. 認証器から署名付き認証情報を取得
-7. バックエンドに認証完了リクエスト
+4. Frontend invokes the platform authenticator
+5. User completes biometric authentication
+6. Authenticator returns the signed credential
+7. Send authentication finish request to the backend
    POST /api/passkey/login/finish
    Body: { credential: PublicKeyCredential }
-8. バックエンドで検証:
-   - チャレンジの検証
-   - 署名の検証
-   - ユーザー特定
-9. 成功時:
-   - セッショントークン発行
-   - ログイン成功画面へ遷移
-   - 認証方法: 「Passkey認証」表示
-10. 失敗時: エラーメッセージ表示
+8. Backend verifies:
+   - Challenge verification
+   - Signature verification
+   - User identification
+9. On success:
+   - Issue session token
+   - Navigate to login success screen
+   - Show authentication method: "Passkey"
+10. On failure: show an error message
 ```
 
-### 3.4 ログアウト機能
+### 3.4 Logout
 ```
-1. ユーザーが「ログアウト」ボタンをタップ
-2. バックエンドにログアウトリクエスト
+1. User taps the Log Out button
+2. Send logout request to the backend
    POST /api/auth/logout
-3. セッション破棄
-4. ウェルカム画面へ遷移
+3. Destroy session
+4. Navigate to the welcome screen
 ```
 
 ---
 
-## 4. バックエンドAPI仕様
+## 4. Backend API specification
 
-### 4.1 エンドポイント一覧
+### 4.1 Endpoint list
 
-#### 4.1.1 認証関連
-| エンドポイント | メソッド | 説明 |
-|--------------|---------|------|
-| /api/auth/register | POST | ユーザー新規登録 |
-| /api/auth/login | POST | パスワードログイン |
-| /api/auth/logout | POST | ログアウト |
-| /api/auth/session | GET | セッション確認 |
+#### 4.1.1 Authentication
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/auth/register | POST | Register user |
+| /api/auth/login | POST | Password login |
+| /api/auth/logout | POST | Logout |
+| /api/auth/session | GET | Check session |
 
-#### 4.1.2 Passkey関連
-| エンドポイント | メソッド | 説明 |
-|--------------|---------|------|
-| /api/passkey/register/start | POST | Passkey登録開始 |
-| /api/passkey/register/finish | POST | Passkey登録完了 |
-| /api/passkey/login/start | POST | Passkeyログイン開始 |
-| /api/passkey/login/finish | POST | Passkeyログイン完了 |
+#### 4.1.2 Passkey
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| /api/passkey/register/start | POST | Start passkey registration |
+| /api/passkey/register/finish | POST | Finish passkey registration |
+| /api/passkey/login/start | POST | Start passkey login |
+| /api/passkey/login/finish | POST | Finish passkey login |
 
-### 4.2 データモデル
+### 4.2 Data model
 
-#### 4.2.1 Usersテーブル
+#### 4.2.1 Users table
 ```sql
 CREATE TABLE users (
     id TEXT PRIMARY KEY,
@@ -233,7 +237,7 @@ CREATE TABLE users (
 );
 ```
 
-#### 4.2.2 Passkeysテーブル
+#### 4.2.2 Passkeys table
 ```sql
 CREATE TABLE passkeys (
     id TEXT PRIMARY KEY,
@@ -247,7 +251,7 @@ CREATE TABLE passkeys (
 );
 ```
 
-#### 4.2.3 Challengesテーブル (一時的なチャレンジ保存)
+#### 4.2.3 Challenges table (temporary challenge storage)
 ```sql
 CREATE TABLE challenges (
     id TEXT PRIMARY KEY,
@@ -261,45 +265,45 @@ CREATE TABLE challenges (
 
 ---
 
-## 5. 非機能要件
+## 5. Non-functional requirements
 
-### 5.1 セキュリティ
-- パスワードはbcryptでハッシュ化 (saltラウンド: 10)
-- HTTPS通信必須 (開発環境では自己署名証明書可)
-- セッションタイムアウト: 24時間
-- チャレンジの有効期限: 5分
-- WebAuthn RPIDはバックエンドのドメインと一致させる
+### 5.1 Security
+- Passwords are hashed with bcrypt (salt rounds: 10)
+- HTTPS is required (self-signed certificates allowed for development)
+- Session timeout: 24 hours
+- Challenge expiration: 5 minutes
+- WebAuthn RP ID must match the backend domain
 
-### 5.2 エラーハンドリング
-- ネットワークエラー時の適切なメッセージ表示
-- 生体認証キャンセル時のハンドリング
-- タイムアウト処理
-- バリデーションエラーの明確な表示
+### 5.2 Error handling
+- Appropriate messages for network errors
+- Handle biometric authentication cancellation
+- Timeout handling
+- Clear validation error messaging
 
-### 5.3 ユーザビリティ
-- ローディングインジケーター表示
-- トーストメッセージでのフィードバック
-- 入力フィールドのバリデーション (リアルタイム)
-- プラットフォーム別のUI/UX最適化
+### 5.3 Usability
+- Loading indicator display
+- Toast feedback messages
+- Real-time input validation
+- Platform-specific UI/UX optimization
 
 ---
 
-## 6. 開発環境セットアップ要件
+## 6. Development environment setup requirements
 
-### 6.1 フロントエンド
+### 6.1 Frontend
 ```bash
-# 必要なパッケージ
-- react-native (最新版)
+# Required packages
+- react-native (latest)
 - @react-navigation/native
 - @react-navigation/stack
 - @simplewebauthn/browser
-- axios (HTTP通信)
-- react-native-keychain (オプション: セッショントークン保存)
+- axios (HTTP client)
+- react-native-keychain (optional: session token storage)
 ```
 
-### 6.2 バックエンド
+### 6.2 Backend
 ```bash
-# 必要なパッケージ
+# Required packages
 - express
 - @simplewebauthn/server
 - bcrypt
@@ -309,81 +313,81 @@ CREATE TABLE challenges (
 - uuid
 ```
 
-### 6.3 開発ツール
-- Node.js 18以上
+### 6.3 Development tools
+- Node.js 18+
 - React Native CLI
-- Xcode (iOS開発用)
-- Android Studio (Android開発用)
-- 実機またはシミュレータ (Passkeyテストには実機推奨)
+- Xcode (iOS)
+- Android Studio (Android)
+- Physical device or simulator (physical devices recommended for passkey testing)
 
 ---
 
-## 7. テストシナリオ
+## 7. Test scenarios
 
-### 7.1 基本フロー
-1. **新規登録 → パスワードログイン**
-   - ユーザー名・パスワードで登録
-   - ログアウト
-   - 同じ認証情報でログイン
+### 7.1 Basic flows
+1. **Register → Password login**
+   - Register with username and password
+   - Log out
+   - Log in with the same credentials
 
-2. **新規登録 → Passkey追加 → Passkeyログイン**
-   - ユーザー名・パスワードで登録
-   - Passkey追加登録
-   - ログアウト
-   - Passkeyでログイン
+2. **Register → Add passkey → Passkey login**
+   - Register with username and password
+   - Register a passkey
+   - Log out
+   - Log in with passkey
 
-3. **新規登録時にPasskey同時登録 → Passkeyログイン**
-   - 「Passkeyを登録」ONで新規登録
-   - ログアウト
-   - Passkeyでログイン
+3. **Register with passkey → Passkey login**
+   - Register with "Register a passkey" ON
+   - Log out
+   - Log in with passkey
 
-### 7.2 エラーケース
-1. 重複ユーザー名での登録
-2. 誤ったパスワードでのログイン
-3. 生体認証のキャンセル
-4. ネットワークエラー時の挙動
-
----
-
-## 8. 実装優先順位
-
-### Phase 1: 基本認証
-1. バックエンド基盤構築 (Express + SQLite)
-2. ユーザー登録API
-3. パスワードログインAPI
-4. フロントエンド画面実装 (ウェルカム、登録、ログイン、成功)
-
-### Phase 2: Passkey機能
-1. Passkey登録API (start/finish)
-2. PasskeyログインAPI (start/finish)
-3. フロントエンドPasskey統合
-4. Passkey管理画面
-
-### Phase 3: 最適化
-1. エラーハンドリング強化
-2. UI/UX改善
-3. プラットフォーム別調整
+### 7.2 Error cases
+1. Register with a duplicate username
+2. Login with an incorrect password
+3. Cancel biometric authentication
+4. Network error behavior
 
 ---
 
-## 9. 参考情報
+## 8. Implementation priority
 
-### 9.1 WebAuthn仕様
+### Phase 1: Basic authentication
+1. Backend foundation (Express + SQLite)
+2. User registration API
+3. Password login API
+4. Frontend screens (welcome, register, login, success)
+
+### Phase 2: Passkey features
+1. Passkey registration API (start/finish)
+2. Passkey login API (start/finish)
+3. Frontend passkey integration
+4. Passkey management screen
+
+### Phase 3: Optimization
+1. Improved error handling
+2. UI/UX improvements
+3. Platform-specific adjustments
+
+---
+
+## 9. References
+
+### 9.1 WebAuthn specifications
 - W3C WebAuthn Level 2: https://www.w3.org/TR/webauthn-2/
 - FIDO2 CTAP: https://fidoalliance.org/specs/
 
-### 9.2 プラットフォーム別ドキュメント
+### 9.2 Platform documentation
 - iOS Passkeys: https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys
 - Android Credential Manager: https://developer.android.com/training/sign-in/passkeys
 
-### 9.3 ライブラリドキュメント
+### 9.3 Library documentation
 - SimpleWebAuthn: https://simplewebauthn.dev/
 
 ---
 
-## 10. 備考
+## 10. Notes
 
-- この仕様書はClaude Codeでの実装を前提としています
-- 実装時にライブラリの互換性問題が発生した場合は代替案を検討
-- 本番環境では適切なドメイン・HTTPS設定が必要
-- Passkeyの動作確認には実機が強く推奨されます (シミュレータでは制限あり)
+- This specification assumes implementation with Claude Code
+- If library compatibility issues arise, evaluate alternatives
+- Production requires correct domain and HTTPS configuration
+- Physical devices are strongly recommended for passkey validation (simulators may be limited)

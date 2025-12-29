@@ -34,7 +34,7 @@ import {
   normalizeStringArray,
 } from '../config/localConfig';
 
-// WebAuthn設定
+// WebAuthn configuration
 const rpName =
   process.env.RP_NAME || backendLocalConfig.rpName || 'Passkey Auth App';
 const rpID = process.env.RP_ID || backendLocalConfig.rpId || 'localhost';
@@ -71,7 +71,7 @@ const androidApkKeyHashes = [
 ].filter(Boolean);
 
 /**
- * Passkey登録開始
+ * Start passkey registration.
  * POST /api/passkey/register/start
  */
 export async function registerStart(req: Request, res: Response) {
@@ -79,21 +79,21 @@ export async function registerStart(req: Request, res: Response) {
     const { username } = req.body;
 
     if (!username) {
-      return res.status(400).json({ error: 'ユーザー名が必要です' });
+      return res.status(400).json({ error: 'Username is required.' });
     }
 
-    // ユーザーの存在確認
+    // Ensure the user exists.
     const user = getUserByUsername(username);
     if (!user) {
-      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    // 既存のPasskeyを取得
+    // Fetch existing passkeys.
     const existingPasskeys = getPasskeysByUserId(user.id);
     if (existingPasskeys.length > 0) {
       return res.json({
         alreadyRegistered: true,
-        message: 'Passkeyは既に登録されています',
+        message: 'Passkey is already registered.',
       });
     }
     const excludeCredentials = existingPasskeys.map((passkey) => ({
@@ -104,7 +104,7 @@ export async function registerStart(req: Request, res: Response) {
         : undefined,
     }));
 
-    // 登録オプション生成
+    // Generate registration options.
     const options: GenerateRegistrationOptionsOpts = {
       rpName,
       rpID,
@@ -115,9 +115,9 @@ export async function registerStart(req: Request, res: Response) {
       attestationType: 'none',
       excludeCredentials,
       authenticatorSelection: {
-        authenticatorAttachment: 'platform', // プラットフォーム認証器（Face ID/Touch ID）
-        requireResidentKey: false, // 開発環境用に緩和
-        residentKey: 'preferred', // requiredから変更
+        authenticatorAttachment: 'platform', // Platform authenticators (Face ID/Touch ID)
+        requireResidentKey: false, // Relaxed for development
+        residentKey: 'preferred', // Changed from required
         userVerification: 'required',
       },
       supportedAlgorithmIDs: [-7, -257], // ES256, RS256
@@ -125,7 +125,7 @@ export async function registerStart(req: Request, res: Response) {
 
     const registrationOptions = await generateRegistrationOptions(options);
 
-    // チャレンジを保存
+    // Store the challenge.
     cleanupUserChallenges(user.id, 'registration');
     createChallenge({
       challenge: registrationOptions.challenge,
@@ -145,12 +145,12 @@ export async function registerStart(req: Request, res: Response) {
     res.json(registrationOptions);
   } catch (error) {
     console.error('Register start error:', error);
-    res.status(500).json({ error: '登録開始に失敗しました' });
+    res.status(500).json({ error: 'Failed to start passkey registration.' });
   }
 }
 
 /**
- * Passkey登録完了
+ * Finish passkey registration.
  * POST /api/passkey/register/finish
  */
 export async function registerFinish(req: Request, res: Response) {
@@ -162,16 +162,16 @@ export async function registerFinish(req: Request, res: Response) {
 
     if (!username || !credential) {
       console.error('Missing username or credential');
-      return res.status(400).json({ error: 'ユーザー名と認証情報が必要です' });
+      return res.status(400).json({ error: 'Username and credential are required.' });
     }
 
-    // ユーザーの存在確認
+    // Ensure the user exists.
     const user = getUserByUsername(username);
     if (!user) {
-      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    // 保存されたチャレンジを取得
+    // Retrieve the stored challenge.
     const registrationResponse: RegistrationResponseJSON = credential;
     const clientDataJSON = isoBase64URL.toBuffer(
       registrationResponse.response.clientDataJSON
@@ -183,11 +183,11 @@ export async function registerFinish(req: Request, res: Response) {
     );
 
     if (!expectedChallenge || expectedChallenge.user_id !== user.id) {
-      return res.status(400).json({ error: '無効なチャレンジです' });
+      return res.status(400).json({ error: 'Invalid challenge.' });
     }
 
-    // 検証オプション
-    // モバイルアプリとウェブの両方のoriginを許可
+    // Verification options.
+    // Allow origins for both the mobile app and web.
     const allowedOrigins = [
       origin,
       `https://${rpID}`,
@@ -203,7 +203,7 @@ export async function registerFinish(req: Request, res: Response) {
       requireUserVerification: true,
     };
 
-    // レスポンスを検証
+    // Verify the response.
     let verification;
     try {
       verification = await verifyRegistrationResponse(opts);
@@ -214,19 +214,19 @@ export async function registerFinish(req: Request, res: Response) {
         credential: JSON.stringify(registrationResponse, null, 2),
       });
       return res.status(400).json({ 
-        error: '認証情報の検証に失敗しました',
+        error: 'Failed to verify credential.',
         details: verifyError.message 
       });
     }
 
     if (!verification.verified || !verification.registrationInfo) {
       console.error('Verification failed:', verification);
-      return res.status(400).json({ error: '認証情報の検証に失敗しました' });
+      return res.status(400).json({ error: 'Failed to verify credential.' });
     }
 
     const { credentialPublicKey, credentialID, counter } = verification.registrationInfo;
 
-    // Passkeyをデータベースに保存
+    // Save the passkey in the database.
     const credentialIdBase64 = isoBase64URL.fromBuffer(credentialID);
     const publicKeyBase64 = Buffer.from(credentialPublicKey).toString('base64');
 
@@ -238,16 +238,16 @@ export async function registerFinish(req: Request, res: Response) {
       transports: registrationResponse.response.transports,
     });
 
-    // チャレンジを削除
+    // Delete the challenge.
     deleteChallengeByValue(expectedChallenge.challenge);
 
-    // セッションに保存
+    // Store in session.
     req.session.userId = user.id;
     req.session.authMethod = 'passkey';
 
     res.json({
       verified: true,
-      message: 'Passkeyの登録が完了しました',
+      message: 'Passkey registration completed.',
       user: {
         id: user.id,
         username: user.username,
@@ -255,27 +255,27 @@ export async function registerFinish(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Register finish error:', error);
-    res.status(500).json({ error: '登録完了に失敗しました' });
+    res.status(500).json({ error: 'Failed to finish passkey registration.' });
   }
 }
 
 /**
- * Passkeyログイン開始
+ * Start passkey login.
  * POST /api/passkey/login/start
  */
 export async function loginStart(req: Request, res: Response) {
   try {
-    // usernameless認証（ユーザー名不要）
+    // Usernameless authentication (no username required).
     const options: GenerateAuthenticationOptionsOpts = {
       rpID,
       timeout: 60000,
       userVerification: 'required',
-      // allowCredentialsを空にしてusernameless認証を有効化
+      // Allow usernameless auth by leaving allowCredentials empty.
     };
 
     const authenticationOptions = await generateAuthenticationOptions(options);
 
-    // チャレンジを保存（user_idはnullでusernameless）
+    // Store the challenge (user_id is null for usernameless).
     createChallenge({
       challenge: authenticationOptions.challenge,
       type: 'authentication',
@@ -285,12 +285,12 @@ export async function loginStart(req: Request, res: Response) {
     res.json(authenticationOptions);
   } catch (error) {
     console.error('Login start error:', error);
-    res.status(500).json({ error: 'ログイン開始に失敗しました' });
+    res.status(500).json({ error: 'Failed to start passkey login.' });
   }
 }
 
 /**
- * Passkeyログイン完了
+ * Finish passkey login.
  * POST /api/passkey/login/finish
  */
 export async function loginFinish(req: Request, res: Response) {
@@ -298,26 +298,26 @@ export async function loginFinish(req: Request, res: Response) {
     const { credential } = req.body;
 
     if (!credential) {
-      return res.status(400).json({ error: '認証情報が必要です' });
+      return res.status(400).json({ error: 'Credential is required.' });
     }
 
     const authenticationResponse: AuthenticationResponseJSON = credential;
 
-    // credentialIdからPasskeyを取得
+    // Retrieve the passkey by credentialId.
     const credentialIdBase64 = authenticationResponse.id;
     const passkey = getPasskeyByCredentialId(credentialIdBase64);
 
     if (!passkey) {
-      return res.status(404).json({ error: 'Passkeyが見つかりません' });
+      return res.status(404).json({ error: 'Passkey not found.' });
     }
 
-    // ユーザーを取得
+    // Retrieve the user.
     const user = getUserById(passkey.user_id);
     if (!user) {
-      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    // 保存されたチャレンジを取得
+    // Retrieve the stored challenge.
     const authClientDataJSON = isoBase64URL.toBuffer(
       authenticationResponse.response.clientDataJSON
     );
@@ -330,11 +330,11 @@ export async function loginFinish(req: Request, res: Response) {
     );
 
     if (!expectedChallenge) {
-      return res.status(400).json({ error: '無効なチャレンジです' });
+      return res.status(400).json({ error: 'Invalid challenge.' });
     }
 
-    // 検証オプション
-    // モバイルアプリとウェブの両方のoriginを許可
+    // Verification options.
+    // Allow origins for both the mobile app and web.
     const allowedOrigins = [
       origin,
       `https://${rpID}`,
@@ -357,26 +357,26 @@ export async function loginFinish(req: Request, res: Response) {
       requireUserVerification: true,
     };
 
-    // レスポンスを検証
+    // Verify the response.
     const verification = await verifyAuthenticationResponse(opts);
 
     if (!verification.verified) {
-      return res.status(400).json({ error: '認証の検証に失敗しました' });
+      return res.status(400).json({ error: 'Failed to verify authentication.' });
     }
 
-    // カウンターを更新
+    // Update the counter.
     updatePasskeyCounter(passkey.credential_id, verification.authenticationInfo.newCounter);
 
-    // チャレンジを削除
+    // Delete the challenge.
     deleteChallengeByValue(expectedChallenge.challenge);
 
-    // セッションに保存
+    // Store in session.
     req.session.userId = user.id;
     req.session.authMethod = 'passkey';
 
     res.json({
       verified: true,
-      message: 'Passkeyログインに成功しました',
+      message: 'Passkey login succeeded.',
       user: {
         id: user.id,
         username: user.username,
@@ -385,6 +385,6 @@ export async function loginFinish(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Login finish error:', error);
-    res.status(500).json({ error: 'ログイン完了に失敗しました' });
+    res.status(500).json({ error: 'Failed to finish passkey login.' });
   }
 }

@@ -5,6 +5,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/types';
 import {registerPasskey, isPasskeySupported} from '../services/passkeyService';
+import {useTranslation} from '../localization';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -14,16 +15,17 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const {user, authMethod, logout} = useAuth();
+  const {t, language} = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
-    Alert.alert('ログアウト', '本当にログアウトしますか？', [
+    Alert.alert(t('homeLogoutConfirmTitle'), t('homeLogoutConfirmMessage'), [
       {
-        text: 'キャンセル',
+        text: t('homeLogoutCancel'),
         style: 'cancel',
       },
       {
-        text: 'ログアウト',
+        text: t('homeLogoutConfirm'),
         style: 'destructive',
         onPress: async () => {
           await logout();
@@ -35,15 +37,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const handleManagePasskey = async () => {
     if (!isPasskeySupported()) {
       Alert.alert(
-        'Passkey未対応',
-        'このデバイスではPasskeyがサポートされていません',
-        [{text: 'OK'}]
+        t('homePasskeyNotSupportedTitle'),
+        t('homePasskeyNotSupportedMessage'),
+        [{text: t('commonOk')}],
       );
       return;
     }
 
     if (!user?.username) {
-      Alert.alert('エラー', 'ユーザー情報が取得できません');
+      Alert.alert(t('homeUserFetchErrorTitle'), t('homeUserFetchErrorMessage'));
       return;
     }
 
@@ -52,19 +54,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       const result = await registerPasskey(user.username);
       if (result === 'skipped') {
         Alert.alert(
-          'Passkey登録',
-          'Passkeyは既に登録されています。',
-          [{text: 'OK'}]
+          t('homePasskeyAlreadyRegisteredTitle'),
+          t('homePasskeyAlreadyRegisteredMessage'),
+          [{text: t('commonOk')}],
         );
         return;
       }
       Alert.alert(
-        'Passkey登録完了',
-        'Passkeyが正常に登録されました。次回から生体認証でログインできます。',
-        [{text: 'OK'}]
+        t('homePasskeyRegisterSuccessTitle'),
+        t('homePasskeyRegisterSuccessMessage'),
+        [{text: t('commonOk')}],
       );
     } catch (error: any) {
-      Alert.alert('Passkey登録失敗', error.message);
+      Alert.alert(t('homePasskeyRegisterFailedTitle'), error.message);
     } finally {
       setLoading(false);
     }
@@ -77,17 +79,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const getAuthMethodText = () => {
     switch (authMethod) {
       case 'password':
-        return 'パスワード認証';
+        return t('homeAuthMethodPassword');
       case 'passkey':
-        return 'Passkey認証';
+        return t('homeAuthMethodPasskey');
       default:
-        return '不明';
+        return t('homeAuthMethodUnknown');
     }
   };
 
   const getCurrentDateTime = () => {
     const now = new Date();
-    return now.toLocaleString('ja-JP', {
+    return now.toLocaleString(language === 'ja' ? 'ja-JP' : 'en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -104,37 +106,43 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.successIcon}>✓</Text>
-          <Text style={styles.title}>ログイン成功</Text>
+          <Text style={styles.title}>{t('homeTitle')}</Text>
         </View>
 
         <View style={styles.infoContainer}>
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>認証方法</Text>
+            <Text style={styles.infoLabel}>{t('homeAuthMethodLabel')}</Text>
             <Text style={styles.infoValue}>{getAuthMethodText()}</Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>ユーザー名</Text>
-            <Text style={styles.infoValue}>{user?.username || '不明'}</Text>
+            <Text style={styles.infoLabel}>{t('homeUsernameLabel')}</Text>
+            <Text style={styles.infoValue}>
+              {user?.username || t('homeAuthMethodUnknown')}
+            </Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>認証日時</Text>
+            <Text style={styles.infoLabel}>{t('homeAuthTimeLabel')}</Text>
             <Text style={styles.infoValue}>{getCurrentDateTime()}</Text>
           </View>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>ユーザーID</Text>
-            <Text style={styles.infoValueSmall}>{user?.id || '不明'}</Text>
+            <Text style={styles.infoLabel}>{t('homeUserIdLabel')}</Text>
+            <Text style={styles.infoValueSmall}>
+              {user?.id || t('homeAuthMethodUnknown')}
+            </Text>
           </View>
         </View>
 
         <View style={styles.description}>
-          <Text style={styles.descriptionTitle}>🎉 認証が完了しました</Text>
+          <Text style={styles.descriptionTitle}>
+            {t('homeDescriptionTitle')}
+          </Text>
           <Text style={styles.descriptionText}>
             {authMethod === 'password'
-              ? 'パスワード認証でログインしました。Passkey機能を有効にすることで、次回から生体認証でログインできるようになります。'
-              : 'Passkey認証でログインしました。次回から生体認証のみでログインできます。'}
+              ? t('homeDescriptionPassword')
+              : t('homeDescriptionPasskey')}
           </Text>
         </View>
       </ScrollView>
@@ -142,20 +150,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       <View style={styles.buttonContainer}>
         {authMethod === 'password' && (
           <Button
-            title="Passkeyを追加登録"
+            title={t('homeRegisterPasskeyButton')}
             onPress={handleManagePasskey}
             variant="secondary"
             style={styles.button}
           />
         )}
         <Button
-          title="診断ツール"
+          title={t('homeDiagnosticsButton')}
           onPress={handleOpenDiagnostics}
           variant="secondary"
           style={styles.button}
         />
         <Button
-          title="ログアウト"
+          title={t('homeLogoutButton')}
           onPress={handleLogout}
           style={styles.button}
         />
