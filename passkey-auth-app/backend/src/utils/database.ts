@@ -3,26 +3,26 @@ import type BetterSqlite3 from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-// データベースファイルのパス
+// Database file path
 const DB_PATH = process.env.DB_PATH || './data/database.sqlite';
 
-// データディレクトリが存在しない場合は作成
+// Create the data directory if it does not exist.
 const dbDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// データベース接続
+// Database connection
 const db: BetterSqlite3.Database = new Database(DB_PATH);
 
-// WALモードを有効化（並行アクセス性能向上）
+// Enable WAL mode for better concurrency.
 db.pragma('journal_mode = WAL');
 
 /**
- * データベーステーブルの初期化
+ * Initialize database tables.
  */
 export function initDatabase(): void {
-  // Usersテーブル
+  // Users table
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -32,7 +32,7 @@ export function initDatabase(): void {
     )
   `);
 
-  // Passkeysテーブル
+  // Passkeys table
   db.exec(`
     CREATE TABLE IF NOT EXISTS passkeys (
       id TEXT PRIMARY KEY,
@@ -46,7 +46,7 @@ export function initDatabase(): void {
     )
   `);
 
-  // Challengesテーブル（一時的なチャレンジ保存）
+  // Challenges table (temporary challenge storage)
   db.exec(`
     CREATE TABLE IF NOT EXISTS challenges (
       id TEXT PRIMARY KEY,
@@ -58,7 +58,7 @@ export function initDatabase(): void {
     )
   `);
 
-  // 期限切れチャレンジを削除するインデックス
+  // Index for removing expired challenges
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_challenges_expires_at 
     ON challenges(expires_at)
@@ -68,7 +68,7 @@ export function initDatabase(): void {
 }
 
 /**
- * 期限切れのチャレンジを削除
+ * Remove expired challenges.
  */
 export function cleanupExpiredChallenges(): void {
   const stmt = db.prepare(`
@@ -81,7 +81,7 @@ export function cleanupExpiredChallenges(): void {
   }
 }
 
-// 定期的に期限切れチャレンジをクリーンアップ（5分ごと）
+// Periodically clean up expired challenges (every 5 minutes).
 setInterval(cleanupExpiredChallenges, 5 * 60 * 1000);
 
 export default db;

@@ -17,7 +17,7 @@ export interface CreateUserData {
 }
 
 /**
- * 新規ユーザーを作成
+ * Create a new user.
  */
 export function createUser(data: CreateUserData): User {
   const id = uuidv4();
@@ -34,7 +34,7 @@ export function createUser(data: CreateUserData): User {
 }
 
 /**
- * ユーザー名でユーザーを取得
+ * Fetch a user by username.
  */
 export function getUserByUsername(username: string): User | undefined {
   const stmt = db.prepare(`
@@ -45,7 +45,7 @@ export function getUserByUsername(username: string): User | undefined {
 }
 
 /**
- * IDでユーザーを取得
+ * Fetch a user by ID.
  */
 export function getUserById(id: string): User | undefined {
   const stmt = db.prepare(`
@@ -56,14 +56,14 @@ export function getUserById(id: string): User | undefined {
 }
 
 /**
- * パスワードを検証
+ * Verify a password.
  */
 export function verifyPassword(user: User, password: string): boolean {
   return bcrypt.compareSync(password, user.password_hash);
 }
 
 /**
- * ユーザー名の重複チェック
+ * Check if a username already exists.
  */
 export function isUsernameExists(username: string): boolean {
   const user = getUserByUsername(username);

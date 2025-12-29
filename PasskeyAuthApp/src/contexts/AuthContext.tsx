@@ -2,6 +2,7 @@ import React, {createContext, useContext, useState, useEffect} from 'react';
 import {AuthState, User, AuthMethod, LoginRequest, RegisterRequest} from '../types';
 import {authApi} from '../services/api';
 import {authenticateWithPasskey} from '../services/passkeyService';
+import {translateServerMessage, useTranslation} from '../localization';
 
 interface AuthContextType extends AuthState {
   login: (data: LoginRequest) => Promise<{success: boolean; message: string}>;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
   children,
 }) => {
+  const {t} = useTranslation();
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     authMethod: null,
@@ -27,7 +29,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
     isLoading: true,
   });
 
-  // アプリ起動時にセッションをチェック
+  // Check the session on app launch.
   useEffect(() => {
     checkSession();
   }, []);
@@ -38,7 +40,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
       if (response.authenticated && response.user) {
         setAuthState({
           user: response.user,
-          authMethod: 'password', // セッションからの場合はパスワード認証と仮定
+          authMethod: 'password', // Assume password auth when restored from session.
           isAuthenticated: true,
           isLoading: false,
         });
@@ -69,13 +71,16 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
           isAuthenticated: true,
           isLoading: false,
         });
-        return {success: true, message: response.message};
-      }
-      return {success: false, message: response.message};
+      return {success: true, message: response.message};
+    }
+      const message = response.message
+        ? translateServerMessage(response.message)
+        : t('errorsLoginFailed');
+      return {success: false, message};
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || 'ログインに失敗しました',
+        message: error.message || t('errorsLoginFailed'),
       };
     }
   };
@@ -95,16 +100,20 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
           isAuthenticated: true,
           isLoading: false,
         });
-        return {success: true, message: 'Passkeyでログインしました', user: session.user};
+        return {
+          success: true,
+          message: t('serverPasskeyLoginSuccess'),
+          user: session.user,
+        };
       }
       return {
         success: false,
-        message: 'セッションが確認できませんでした',
+        message: t('errorsSessionUnavailable'),
       };
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || 'Passkeyログインに失敗しました',
+        message: error.message || t('errorsPasskeyAuthenticationFailed'),
       };
     }
   };
@@ -117,11 +126,14 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
       if (response.success) {
         return {success: true, message: response.message};
       }
-      return {success: false, message: response.message};
+      const message = response.message
+        ? translateServerMessage(response.message)
+        : t('errorsRegisterFailed');
+      return {success: false, message};
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || '登録に失敗しました',
+        message: error.message || t('errorsRegisterFailed'),
       };
     }
   };
@@ -137,7 +149,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({
       });
     } catch (error) {
       console.error('Logout error:', error);
-      // エラーが発生してもローカルの状態はクリア
+      // Clear local state even if logout fails.
       setAuthState({
         user: null,
         authMethod: null,

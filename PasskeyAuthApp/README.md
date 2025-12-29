@@ -1,31 +1,31 @@
 # PasskeyAuthApp (Mobile)
 
-React Nativeで実装したPasskey検証用モバイルアプリです。
-バックエンドと連携して、パスワードログインとPasskey登録/ログインの動作確認を行います。
+A React Native mobile app for passkey verification.
+It works with the backend to validate password login and passkey registration/login flows.
 
-## 前提条件
+## Prerequisites
 
 - Node.js 20+
 - npm
 - iOS: Xcode / CocoaPods
 - Android: Android Studio / JDK
 
-## ローカル設定
+## Local configuration
 
-環境固有の値は `config/local.json` に集約します（git管理対象外）。
-初回は `config/local.example.json` をコピーして作成してください。
+Environment-specific values live in `config/local.json` (gitignored).
+Copy `config/local.example.json` to get started.
 
 ```bash
 cp ../config/local.example.json ../config/local.json
 ```
 
-主に使用される項目:
+Key fields:
 - `mobile.apiBaseUrl`
 - `backend.androidPackageName`
 - `backend.iosBundleId`
 - `backend.appleTeamId`
 
-## セットアップ
+## Setup
 
 ```bash
 cd PasskeyAuthApp
@@ -40,7 +40,7 @@ bundle exec pod install
 cd ..
 ```
 
-## 起動
+## Run
 
 ### iOS
 
@@ -54,35 +54,35 @@ npm run ios
 npm run android:local
 ```
 
-Androidエミュレータで localhost に接続する場合:
+For Android emulators connecting to localhost:
 ```bash
 adb reverse tcp:3000 tcp:3000
 ```
 
-## テスト
+## Tests
 
 ```bash
-# モバイルアプリディレクトリに移動
+# Move to the mobile app directory
 cd PasskeyAuthApp
 
-# テスト実行
+# Run tests
 npm test -- --runTestsByPath __tests__/services/api.test.ts
 ```
 
-全テストを実行する場合は以下を使用します:
+To run all tests:
 
 ```bash
 cd PasskeyAuthApp
 npm test
 ```
 
-## 開発メモ
+## Development notes
 
-- `npm run ios` は `config/local.json` から `ios/Config/Local.xcconfig` を生成してからビルドします。
-- `npm run android:local` は `config/local.json` の `backend.androidPackageName` を使って起動します。
+- `npm run ios` builds after generating `ios/Config/Local.xcconfig` from `config/local.json`.
+- `npm run android:local` uses `backend.androidPackageName` from `config/local.json`.
 
-## 詳細ドキュメント
+## Additional docs
 
-- iOS/Android のセットアップ詳細: `docs/ios-setup.md`
-- シミュレータのPasskey設定: `docs/simulator-passkey-setup.md`
-- テスト手順: `docs/passkey-test-guide.md`
+- iOS/Android setup details: `docs/ios-setup.md`
+- Passkey setup for simulators: `docs/simulator-passkey-setup.md`
+- Test guide: `docs/passkey-test-guide.md`

@@ -6,25 +6,27 @@ import {
   SessionResponse,
 } from '../types';
 import { getMobileConfig } from '../config/localConfig';
+import {translate} from '../localization';
 
 const { apiBaseUrl } = getMobileConfig();
 
-// バックエンドのURLを設定
-// 開発環境: iOSシミュレータはlocalhost、Android EmulatorはIP 10.0.2.2
-// 実機の場合はMacのホスト名.localを使用 (mDNS)
+// Backend URL configuration:
+// - iOS simulator uses localhost
+// - Android emulator uses 10.0.2.2
+// - Physical devices use your host's .local name (mDNS)
 export const API_BASE_URL = apiBaseUrl;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  withCredentials: true, // セッションCookie用
+  withCredentials: true, // Session cookies
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 export const authApi = {
-  // ユーザー登録
+  // Register
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     try {
       const response = await api.post<AuthResponse>('/api/auth/register', data);
@@ -33,11 +35,11 @@ export const authApi = {
       if (error.response?.data) {
         return error.response.data;
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 
-  // ログイン
+  // Login
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     try {
       const response = await api.post<AuthResponse>('/api/auth/login', data);
@@ -46,21 +48,21 @@ export const authApi = {
       if (error.response?.data) {
         return error.response.data;
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 
-  // ログアウト
+  // Logout
   logout: async (): Promise<void> => {
     try {
       await api.post('/api/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
-      throw new Error('ログアウトに失敗しました');
+      throw new Error(translate('errorsLogoutFailed'));
     }
   },
 
-  // セッション確認
+  // Check session
   checkSession: async (): Promise<SessionResponse> => {
     try {
       const response = await api.get<SessionResponse>('/api/auth/session');
@@ -72,7 +74,7 @@ export const authApi = {
 };
 
 export const passkeyApi = {
-  // Passkey登録開始
+  // Start passkey registration
   registerStart: async (username: string): Promise<any> => {
     try {
       const response = await api.post('/api/passkey/register/start', {
@@ -81,13 +83,16 @@ export const passkeyApi = {
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Passkey登録開始に失敗しました');
+        throw new Error(
+          error.response.data.message ||
+            translate('errorsPasskeyRegisterStartFailed'),
+        );
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 
-  // Passkey登録完了
+  // Finish passkey registration
   registerFinish: async (username: string, credential: any): Promise<any> => {
     try {
       const response = await api.post('/api/passkey/register/finish', {
@@ -97,26 +102,32 @@ export const passkeyApi = {
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Passkey登録完了に失敗しました');
+        throw new Error(
+          error.response.data.message ||
+            translate('errorsPasskeyRegisterFinishFailed'),
+        );
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 
-  // Passkeyログイン開始
+  // Start passkey login
   loginStart: async (): Promise<any> => {
     try {
       const response = await api.post('/api/passkey/login/start');
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Passkeyログイン開始に失敗しました');
+        throw new Error(
+          error.response.data.message ||
+            translate('errorsPasskeyLoginStartFailed'),
+        );
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 
-  // Passkeyログイン完了
+  // Finish passkey login
   loginFinish: async (credential: any): Promise<AuthResponse> => {
     try {
       const response = await api.post<AuthResponse>(
@@ -128,7 +139,7 @@ export const passkeyApi = {
       if (error.response?.data) {
         return error.response.data;
       }
-      throw new Error('ネットワークエラーが発生しました');
+      throw new Error(translate('errorsNetwork'));
     }
   },
 };

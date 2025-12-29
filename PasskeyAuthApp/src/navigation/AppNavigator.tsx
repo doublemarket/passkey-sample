@@ -9,13 +9,16 @@ import {DiagnosticsScreen} from '../screens/DiagnosticsScreen';
 import {RootStackParamList} from './types';
 import {useAuth} from '../contexts/AuthContext';
 import {ActivityIndicator, View, StyleSheet} from 'react-native';
+import {useLanguage, useTranslation} from '../localization';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
   const {isAuthenticated, isLoading} = useAuth();
+  const {isReady} = useLanguage();
+  const {t} = useTranslation();
 
-  if (isLoading) {
+  if (isLoading || !isReady) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -41,7 +44,7 @@ export const AppNavigator: React.FC = () => {
               name="Home"
               component={HomeScreen}
               options={{
-                title: 'ホーム',
+                title: t('navigationHome'),
                 headerLeft: () => null,
               }}
             />
@@ -49,7 +52,7 @@ export const AppNavigator: React.FC = () => {
               name="Diagnostics"
               component={DiagnosticsScreen}
               options={{
-                title: '診断',
+                title: t('navigationDiagnostics'),
               }}
             />
           </>
@@ -66,14 +69,14 @@ export const AppNavigator: React.FC = () => {
               name="Login"
               component={LoginScreen}
               options={{
-                title: 'ログイン',
+                title: t('navigationLogin'),
               }}
             />
             <Stack.Screen
               name="Register"
               component={RegisterScreen}
               options={{
-                title: '新規登録',
+                title: t('navigationRegister'),
               }}
             />
           </>

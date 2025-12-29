@@ -16,6 +16,7 @@ import {useAuth} from '../contexts/AuthContext';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/types';
 import {registerPasskey, isPasskeySupported} from '../services/passkeyService';
+import {useTranslation} from '../localization';
 
 type RegisterScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,6 +29,7 @@ interface RegisterScreenProps {
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
   const {register} = useAuth();
+  const {t} = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -44,26 +46,26 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
     const newErrors = {username: '', password: '', confirmPassword: ''};
 
     if (!username.trim()) {
-      newErrors.username = 'ユーザー名を入力してください';
+      newErrors.username = t('registerValidationUsernameRequired');
       valid = false;
     } else if (username.length < 3) {
-      newErrors.username = 'ユーザー名は3文字以上で入力してください';
+      newErrors.username = t('registerValidationUsernameLength');
       valid = false;
     }
 
     if (!password) {
-      newErrors.password = 'パスワードを入力してください';
+      newErrors.password = t('registerValidationPasswordRequired');
       valid = false;
     } else if (password.length < 6) {
-      newErrors.password = 'パスワードは6文字以上で入力してください';
+      newErrors.password = t('registerValidationPasswordLength');
       valid = false;
     }
 
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'パスワード（確認）を入力してください';
+      newErrors.confirmPassword = t('registerValidationConfirmPasswordRequired');
       valid = false;
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'パスワードが一致しません';
+      newErrors.confirmPassword = t('registerValidationPasswordMismatch');
       valid = false;
     }
 
@@ -81,27 +83,29 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
       const result = await register({username, password});
       if (result.success) {
         if (registerWithPasskey && isPasskeySupported()) {
-          // Passkeyを登録
+          // Register a passkey.
           try {
             const passkeyResult = await registerPasskey(username);
             const message =
               passkeyResult === 'skipped'
-                ? 'アカウントは作成されました。Passkeyは既に登録されているためスキップしました。ログイン画面に移動します。'
-                : 'アカウントとPasskeyが作成されました。ログイン画面に移動します。';
-            Alert.alert('登録完了', message, [
+                ? t('registerSuccessPasskeySkipped')
+                : t('registerSuccessAccountAndPasskey');
+            Alert.alert(t('registerSuccessTitle'), message, [
               {
-                text: 'OK',
+                text: t('commonOk'),
                 onPress: () => navigation.navigate('Login'),
               },
             ]);
           } catch (passkeyError: any) {
-            // Passkey登録が失敗してもアカウント登録は成功しているのでログイン画面へ
+            // Even if passkey registration fails, the account was created.
             Alert.alert(
-              '登録完了',
-              `アカウントが作成されました。\n\nPasskey登録: ${passkeyError.message}\n\nログイン画面に移動します。`,
+              t('registerSuccessTitle'),
+              t('registerSuccessWithPasskeyError', {
+                error: passkeyError.message,
+              }),
               [
                 {
-                  text: 'OK',
+                  text: t('commonOk'),
                   onPress: () => navigation.navigate('Login'),
                 },
               ]
@@ -109,21 +113,21 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
           }
         } else {
           Alert.alert(
-            '登録完了',
-            'アカウントが作成されました。ログイン画面に移動します。',
+            t('registerSuccessTitle'),
+            t('registerSuccessAccountCreated'),
             [
               {
-                text: 'OK',
+                text: t('commonOk'),
                 onPress: () => navigation.navigate('Login'),
               },
             ]
           );
         }
       } else {
-        Alert.alert('登録失敗', result.message);
+        Alert.alert(t('registerFailedTitle'), result.message);
       }
     } catch (error: any) {
-      Alert.alert('エラー', error.message || '登録に失敗しました');
+      Alert.alert(t('commonError'), error.message || t('errorsRegisterFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,36 +142,34 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>新規登録</Text>
-          <Text style={styles.subtitle}>
-            アカウント情報を入力してください
-          </Text>
+          <Text style={styles.title}>{t('registerTitle')}</Text>
+          <Text style={styles.subtitle}>{t('registerSubtitle')}</Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            label="ユーザー名"
+            label={t('registerUsernameLabel')}
             value={username}
             onChangeText={setUsername}
-            placeholder="ユーザー名を入力（3文字以上）"
+            placeholder={t('registerUsernamePlaceholder')}
             autoCapitalize="none"
             error={errors.username}
           />
 
           <Input
-            label="パスワード"
+            label={t('registerPasswordLabel')}
             value={password}
             onChangeText={setPassword}
-            placeholder="パスワードを入力（6文字以上）"
+            placeholder={t('registerPasswordPlaceholder')}
             secureTextEntry
             error={errors.password}
           />
 
           <Input
-            label="パスワード（確認）"
+            label={t('registerConfirmPasswordLabel')}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            placeholder="パスワードを再入力"
+            placeholder={t('registerConfirmPasswordPlaceholder')}
             secureTextEntry
             error={errors.confirmPassword}
           />
@@ -175,9 +177,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
           {isPasskeySupported() && (
             <View style={styles.passkeyOption}>
               <View style={styles.passkeyTextContainer}>
-                <Text style={styles.passkeyLabel}>Passkeyを登録</Text>
+                <Text style={styles.passkeyLabel}>
+                  {t('registerPasskeyLabel')}
+                </Text>
                 <Text style={styles.passkeySubtext}>
-                  Face ID/Touch IDで簡単にログインできます
+                  {t('registerPasskeySubtext')}
                 </Text>
               </View>
               <Switch
@@ -189,7 +193,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
           )}
 
           <Button
-            title="登録"
+            title={t('registerButton')}
             onPress={handleRegister}
             loading={loading}
             style={styles.button}
@@ -199,7 +203,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({navigation}) => {
             onPress={() => navigation.navigate('Login')}
             style={styles.linkContainer}>
             <Text style={styles.linkText}>
-              すでにアカウントをお持ちの方はログイン
+              {t('registerHaveAccount')}
             </Text>
           </TouchableOpacity>
         </View>
