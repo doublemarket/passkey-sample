@@ -59,6 +59,23 @@ Androidエミュレータで localhost に接続する場合:
 adb reverse tcp:3000 tcp:3000
 ```
 
+## テスト
+
+```bash
+# モバイルアプリディレクトリに移動
+cd PasskeyAuthApp
+
+# テスト実行
+npm test -- --runTestsByPath __tests__/services/api.test.ts
+```
+
+全テストを実行する場合は以下を使用します:
+
+```bash
+cd PasskeyAuthApp
+npm test
+```
+
 ## 開発メモ
 
 - `npm run ios` は `config/local.json` から `ios/Config/Local.xcconfig` を生成してからビルドします。

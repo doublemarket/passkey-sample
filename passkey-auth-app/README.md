@@ -39,6 +39,13 @@ npm install
 npm run dev
 ```
 
+## テスト
+
+```bash
+# リポジトリルートから実行
+node --test passkey-auth-app/backend/tests/models.test.js
+```
+
 ## API エンドポイント
 
 ### 認証関連
