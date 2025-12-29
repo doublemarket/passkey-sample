@@ -1,0 +1,26 @@
+{
+  "mobile": {
+    "apiBaseUrl": "http://localhost:3000"
+  },
+  "backend": {
+    "port": 3000,
+    "sessionSecret": "your-secret-key-change-in-production",
+    "origin": "http://localhost:3000",
+    "corsOrigins": ["http://localhost:3000"],
+    "rpId": "localhost",
+    "rpName": "Passkey Auth App",
+    "appleTeamId": "YOUR_TEAM_ID",
+    "appleBundleId": "com.example.passkeyauthapp",
+    "iosBundleId": "com.example.passkeyauthapp",
+    "androidPackageName": "com.example.passkeyauthapp",
+    "androidSha256CertFingerprints": [
+      "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99"
+    ],
+    "androidHandleAllUrls": false,
+    "https": {
+      "certPath": "path/to/your-cert.pem",
+      "keyPath": "path/to/your-key.pem",
+      "hostname": "your-hostname.local"
+    }
+  }
+}

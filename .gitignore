@@ -1,0 +1,40 @@
+config/local.json
+PasskeyAuthApp/ios/Config/Local.xcconfig
+PasskeyAuthApp/android/build/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build / Artifacts
+dist/
+build/
+coverage/
+*.log
+
+# iOS
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/
+Pods/
+
+# Android
+.gradle/
+.cxx/
+local.properties
+*.keystore
+
+# Env
+.env
+.env.*.local

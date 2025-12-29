@@ -1,0 +1,2 @@
+#include "../Pods/Target Support Files/Pods-PasskeyAuthApp/Pods-PasskeyAuthApp.release.xcconfig"
+#include "Shared.xcconfig"
